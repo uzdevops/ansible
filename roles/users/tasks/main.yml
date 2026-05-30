@@ -1,0 +1,116 @@
+---
+- name: Detect zsh availability
+  ansible.builtin.command: which zsh
+  register: zsh_check
+  changed_when: false
+  failed_when: false
+
+- name: Set resolved shell (zsh or bash fallback)
+  ansible.builtin.set_fact:
+    resolved_shell: "{{ zsh_check.stdout if zsh_check.rc == 0 else '/bin/bash' }}"
+
+- name: Set sudo group based on OS family
+  ansible.builtin.set_fact:
+    sudo_group: "{{ 'wheel' if ansible_os_family == 'RedHat' else 'sudo' }}"
+
+- name: Ensure wheel and sudo groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - wheel
+    - sudo
+
+- name: Create system groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ user_groups | flatten(levels=1) }}"
+
+- name: Get all users from /etc/passwd (UID 1000-65533)
+  ansible.builtin.command:
+    cmd: "awk -F: '$3 >= 1000 && $3 < 65534 { print $1 }' /etc/passwd"
+  register: passwd_users
+  changed_when: false
+
+- name: Build official users list
+  ansible.builtin.set_fact:
+    official_users: "{{ (users | map(attribute='name') | list + users_to_keep) | unique }}"
+
+- name: Determine users to remove
+  ansible.builtin.set_fact:
+    found_users_to_remove: "{{ passwd_users.stdout_lines | difference(official_users) }}"
+
+- name: Filter users by hostname and all-servers
+  ansible.builtin.set_fact:
+    filtered_users: >-
+      {{ (users | selectattr('servers', 'contains', inventory_hostname) | list
+        + users | selectattr('servers', 'equalto', ['all']) | list) | unique }}
+
+- name: Filter users by group membership
+  ansible.builtin.set_fact:
+    filtered_users: >-
+      {{ (filtered_users
+        + users | selectattr('servers', 'contains', item) | list) | unique }}
+  loop: "{{ group_names }}"
+
+- name: Create users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ resolved_shell }}"
+    state: present
+    password: "{{ item.password | default('!') }}"
+    update_password: on_create
+    groups: "{{ item.user_groups | default([]) | join(',') }}"
+    append: true
+    create_home: true
+    home: "/home/{{ item.name }}"
+  loop: "{{ filtered_users }}"
+
+- name: Add sudo users to OS-appropriate sudo group
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ sudo_group }}"
+    append: true
+  loop: "{{ filtered_users }}"
+  when: item.sudo_user | default(false)
+
+- name: Push SSH public keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ lookup('file', item.1) }}"
+    state: present
+    exclusive: true
+  loop: "{{ filtered_users | subelements('ssh_keys', skip_missing=False) }}"
+
+- name: Deploy sudoers file
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: "0440"
+    backup: true
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: Place MOTD
+  ansible.builtin.template:
+    src: motd.j2
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: "0644"
+  when: motd | bool
+
+- name: Remove MOTD
+  ansible.builtin.file:
+    path: /etc/motd
+    state: absent
+  when: not motd | bool
+
+- name: Remove unlisted users (keep home directory)
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: absent
+    remove: false
+  loop: "{{ found_users_to_remove }}"

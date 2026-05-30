@@ -1,0 +1,13 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Disable and stop unnecessary services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop: "{{ security_disabled_services }}"
+  when: >
+    (item ~ '.service') in ansible_facts.services or
+    item in ansible_facts.services

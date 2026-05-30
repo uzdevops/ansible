@@ -1,0 +1,66 @@
+---
+- name: Create tmp.mount override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/tmp.mount.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy tmp.mount hardening override
+  ansible.builtin.copy:
+    content: |
+      [Mount]
+      Options={{ tmp_mount_options }}
+    dest: /etc/systemd/system/tmp.mount.d/hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd daemon
+    - Remount tmp
+
+- name: Create var-tmp.mount override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/var-tmp.mount.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy var-tmp.mount hardening override
+  ansible.builtin.copy:
+    content: |
+      [Mount]
+      Options={{ var_tmp_mount_options }}
+    dest: /etc/systemd/system/var-tmp.mount.d/hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd daemon
+    - Remount var-tmp
+
+- name: Check if tmp.mount unit exists
+  ansible.builtin.stat:
+    path: /lib/systemd/system/tmp.mount
+  register: tmp_mount_unit
+
+- name: Enable tmp.mount
+  ansible.builtin.systemd:
+    name: tmp.mount
+    enabled: true
+    daemon_reload: false
+  when: tmp_mount_unit.stat.exists
+
+- name: Check if var-tmp.mount unit exists
+  ansible.builtin.stat:
+    path: /lib/systemd/system/var-tmp.mount
+  register: var_tmp_mount_unit
+
+- name: Enable var-tmp.mount
+  ansible.builtin.systemd:
+    name: var-tmp.mount
+    enabled: true
+    daemon_reload: false
+  when: var_tmp_mount_unit.stat.exists

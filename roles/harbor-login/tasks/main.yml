@@ -1,0 +1,14 @@
+---
+- name: Login to Harbor
+  community.docker.docker_login:
+    registry_url: "{{ harbor_url }}"
+    username: "{{ harbor_username }}"
+    password: "{{ harbor_password }}"
+    state: present
+  no_log: true
+
+- name: Logout from Harbor
+  community.docker.docker_login:
+    registry_url: "{{ harbor_url }}"
+    state: absent
+  when: harbor_logout

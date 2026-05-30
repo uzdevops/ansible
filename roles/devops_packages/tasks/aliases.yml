@@ -1,0 +1,8 @@
+---
+- name: Deploy system-wide CLI aliases
+  ansible.builtin.template:
+    src: modern-cli.sh.j2
+    dest: "{{ aliases_file }}"
+    owner: root
+    group: root
+    mode: "0644"

@@ -1,0 +1,7 @@
+---
+- name: Deploy monitoring exporters
+  hosts: all
+  become: true
+  roles:
+    - role: node-exporter
+    - role: postgres-exporter

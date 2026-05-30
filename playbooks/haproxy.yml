@@ -1,0 +1,6 @@
+---
+- name: Apply haproxy role
+  hosts: all
+  become: true
+  roles:
+    - role: haproxy

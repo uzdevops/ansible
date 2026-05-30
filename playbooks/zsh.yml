@@ -1,0 +1,8 @@
+---
+- name: Apply zsh role
+  hosts: all
+  become: true
+  vars:
+    zsh_users: "{{ users | map(attribute='name') | list + ['root'] }}"
+  roles:
+    - role: zsh

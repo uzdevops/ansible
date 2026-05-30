@@ -1,0 +1,106 @@
+---
+# ── Package lists ─────────────────────────────────────────────────
+# eza, duf — apt only (not in EPEL); available via GitHub binaries on RedHat if needed
+packages:
+  Debian:
+    # network
+    - tcpdump
+    - dnsutils
+    - curl
+    - wget
+    - net-tools
+    - iperf3
+    - traceroute
+    - mtr
+    - nmap
+    # devtools
+    - git
+    - jq
+    - python3
+    - python3-pip
+    - build-essential
+    # monitoring
+    - htop
+    - iotop
+    - btop
+    # system
+    - tmux
+    - vim
+    - tree
+    - ncdu
+    - bat
+    - eza
+    - duf
+    # filesystem
+    - zip
+    - unzip
+    - lvm2
+
+  RedHat:
+    # network
+    - tcpdump
+    - bind-utils
+    - curl
+    - wget
+    - net-tools
+    - iperf3
+    - traceroute
+    - mtr
+    - nmap
+    # devtools
+    - git
+    - jq
+    - python3
+    - python3-pip
+    - gcc
+    - gcc-c++
+    - make
+    # monitoring
+    - htop
+    - iotop
+    - btop
+    # system
+    - tmux
+    - vim
+    - tree
+    - ncdu
+    - bat
+    # filesystem
+    - zip
+    - unzip
+    - lvm2
+
+# ── GitHub binary installs ────────────────────────────────────────
+binary_install_dir: /usr/local/bin
+binary_tmp_dir: /tmp/ansible-binaries
+github_api_url: "https://api.github.com/repos"
+
+binaries:
+  - name: procs
+    repo: dalance/procs
+    asset_pattern: "procs-v.*-x86_64-linux\\.zip$"
+    type: archive
+    binary_path: "procs"
+
+
+# Installed via apt on Debian; GitHub fallback for RedHat (not in EPEL)
+binaries_redhat:
+  - name: eza
+    repo: eza-community/eza
+    asset_pattern: "eza_linux_x86_64_musl\\.tar\\.gz$"
+    type: archive
+    binary_path: "eza"
+
+  - name: duf
+    repo: muesli/duf
+    asset_pattern: "duf_.*_linux_amd64\\.tar\\.gz$"
+    type: archive
+    binary_path: "duf"
+
+# ── System-wide aliases ───────────────────────────────────────────
+aliases_file: /etc/profile.d/modern-cli.sh
+
+cli_aliases:
+  ls: eza
+  df: duf
+  ps: procs

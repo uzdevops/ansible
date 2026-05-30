@@ -1,0 +1,28 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    nginx_sites:
+      - name: test-site
+        server_name: test.example.com
+        listen_port: 80
+        listen_ssl: false
+        ssl_certificate: ""
+        ssl_certificate_key: ""
+        root: /var/www/test
+        index: index.html
+        access_log: /var/log/nginx/test_access.log
+        error_log: /var/log/nginx/test_error.log
+        log_format: main
+        use_allowlist: false
+        locations:
+          - path: /
+            proxy_pass: ""
+            extra: |
+              try_files $uri $uri/ =404;
+        extra_config: ""
+
+  roles:
+    - role: nginx

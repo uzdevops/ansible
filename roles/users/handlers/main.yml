@@ -1,0 +1,8 @@
+- name: Restart SSH service (universal)
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - sshd
+    - ssh
+  ignore_errors: true

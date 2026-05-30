@@ -1,0 +1,4 @@
+[Service]
+ExecStart=
+ExecStart=/usr/sbin/haproxy -Ws -f {{ haproxy_main_cfg }} -f {{ haproxy_conf_d_dir }}/ -p /run/haproxy/haproxy.pid
+LimitNOFILE={{ haproxy_limit_nofile }}

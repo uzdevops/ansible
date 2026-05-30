@@ -1,0 +1,32 @@
+---
+docker_edition: ce
+docker_service_manage: true
+docker_service_state: started
+docker_service_enabled: true
+
+docker_users: "{{ users | selectattr('sudo_user', 'equalto', true) | map(attribute='name') | list }}"
+
+# Override default DNS if internal DNS server exists:
+docker_dns:
+   - "1.1.1.1"
+   - "8.8.8.8"
+
+docker_subnet_base: "10.20.0.0/16"
+docker_subnet_size: 24
+
+docker_daemon_options:
+  log-driver: json-file
+  log-opts:
+    max-size: "100m"
+    max-file: "3"
+#  insecure-registries:
+#    - harbor.ahmad.uz
+  dns: "{{ docker_dns }}"
+  default-address-pools:
+    - base: "{{ docker_subnet_base }}"
+      size: "{{ docker_subnet_size }}"
+  default-ulimits:
+    nofile:
+      Name: nofile
+      Soft: 65536
+      Hard: 65536

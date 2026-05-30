@@ -1,0 +1,8 @@
+---
+- name: Deploy HAProxy logrotate config
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: "{{ haproxy_logrotate_conf }}"
+    owner: root
+    group: root
+    mode: "0644"

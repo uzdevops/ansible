@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check sshd hardening config exists
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config.d/99-hardening.conf
+      register: sshd_cfg
+      failed_when: not sshd_cfg.stat.exists
+
+    - name: Validate sshd configuration
+      ansible.builtin.command: sshd -t
+      changed_when: false
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert SSH is running (Debian)
+      ansible.builtin.assert:
+        that: ansible_facts.services['ssh.service'].state == 'running'
+        fail_msg: "SSH service is not running"
+      when: ansible_os_family == "Debian"
+
+    - name: Assert SSH is running (RedHat)
+      ansible.builtin.assert:
+        that: ansible_facts.services['sshd.service'].state == 'running'
+        fail_msg: "SSH service is not running"
+      when: ansible_os_family == "RedHat"

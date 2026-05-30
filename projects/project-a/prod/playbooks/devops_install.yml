@@ -1,0 +1,14 @@
+---
+- name: Install DevOps tools and Docker on project-a prod servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Run devops_packages role
+      ansible.builtin.include_role:
+        name: devops_packages
+      when: devops_packages_enabled | default(false)
+
+    - name: Run docker-install role
+      ansible.builtin.include_role:
+        name: docker-install

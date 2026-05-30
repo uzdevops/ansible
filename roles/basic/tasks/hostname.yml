@@ -1,0 +1,20 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+  when: ansible_fqdn != inventory_hostname
+
+- name: Update /etc/hosts with current hostname
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ infra_public_ip | default(ansible_default_ipv4.address) }} {{ inventory_hostname }} {{ ansible_hostname }}"
+    regexp: "^{{ ansible_default_ipv4.address }}"
+    state: present
+  when: ansible_fqdn != inventory_hostname
+
+- name: Reboot the server
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible"
+    reboot_timeout: 600
+  when: reboot is defined
+  tags: [reboot]

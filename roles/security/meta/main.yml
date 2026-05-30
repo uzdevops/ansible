@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: security
+  author: IMV DevOps
+  description: VM initial security hardening for Ubuntu 24.04 and Rocky Linux 10
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - "24.04"
+    - name: Rocky
+      versions:
+        - "10"
+
+dependencies: []

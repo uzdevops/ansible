@@ -1,0 +1,30 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check sysctl hardening file exists
+      ansible.builtin.stat:
+        path: /etc/sysctl.d/99-hardening.conf
+      register: sysctl_file
+      failed_when: not sysctl_file.stat.exists
+
+    - name: Check USB blacklist file exists
+      ansible.builtin.stat:
+        path: /etc/modprobe.d/usb-storage.conf
+      register: usb_file
+      failed_when: not usb_file.stat.exists
+
+    - name: Check sudoers hardening file exists
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/hardening
+      register: sudoers_file
+      failed_when: not sudoers_file.stat.exists
+
+    - name: Check audit rules file exists
+      ansible.builtin.stat:
+        path: /etc/audit/rules.d/login-events.rules
+      register: audit_file
+      failed_when: not audit_file.stat.exists

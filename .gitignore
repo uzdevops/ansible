@@ -1,0 +1,7 @@
+.vault_pass
+log/
+/tmp/
+*.retry
+vault.yml
+*.pem
+*.key

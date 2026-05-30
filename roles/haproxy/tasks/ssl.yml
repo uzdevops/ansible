@@ -1,0 +1,14 @@
+---
+# HAProxy expects combined PEM files (cert + key in one file).
+# Place PEM files in the playbook's files/ directory and list them
+# under haproxy_ssl_certs.
+
+- name: Copy SSL certificate PEM files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ haproxy_ssl_cert_dir }}/{{ item | basename }}"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ haproxy_ssl_certs }}"
+  notify: reload haproxy

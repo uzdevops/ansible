@@ -1,0 +1,21 @@
+---
+- name: Install HAProxy (Debian)
+  ansible.builtin.apt:
+    name: haproxy
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
+- name: Install HAProxy (RedHat)
+  ansible.builtin.dnf:
+    name: haproxy
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Enable and start HAProxy service
+  ansible.builtin.systemd:
+    name: haproxy
+    state: started
+    enabled: true
+  ignore_errors: "{{ ansible_check_mode }}"

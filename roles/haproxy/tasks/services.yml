@@ -1,0 +1,38 @@
+---
+- name: Find existing service configs in conf.d
+  ansible.builtin.find:
+    paths: "{{ haproxy_conf_d_dir }}"
+    patterns: "*.cfg"
+    excludes: "stats.cfg"
+  register: existing_service_configs
+
+- name: Remove service configs no longer in inventory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ existing_service_configs.files }}"
+  when: >
+    (item.path | basename | splitext | first) not in
+    (haproxy_http_services | map(attribute='name') | list +
+     haproxy_tcp_services | map(attribute='name') | list)
+  notify: reload haproxy
+
+- name: Deploy HTTP service configs
+  ansible.builtin.template:
+    src: conf.d/http_service.cfg.j2
+    dest: "{{ haproxy_conf_d_dir }}/{{ item.name }}.cfg"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ haproxy_http_services }}"
+  notify: reload haproxy
+
+- name: Deploy TCP service configs
+  ansible.builtin.template:
+    src: conf.d/tcp_service.cfg.j2
+    dest: "{{ haproxy_conf_d_dir }}/{{ item.name }}.cfg"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ haproxy_tcp_services }}"
+  notify: reload haproxy

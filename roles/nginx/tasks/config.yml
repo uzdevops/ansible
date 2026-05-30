@@ -1,0 +1,93 @@
+---
+- name: Find existing /etc/nginx/conf.d files
+  ansible.builtin.find:
+    paths: /etc/nginx/conf.d
+    file_type: file
+    recurse: false
+  register: nginx_conf_d_files
+  failed_when: false
+
+- name: Remove old /etc/nginx/conf.d files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ nginx_conf_d_files.files | default([]) }}"
+  when: nginx_conf_d_files.matched | default(0) > 0
+
+- name: Find existing /etc/nginx/sites-enabled files
+  ansible.builtin.find:
+    paths: /etc/nginx/sites-enabled
+    file_type: file
+    recurse: false
+  register: nginx_sites_enabled_files
+  failed_when: false
+
+- name: Remove old /etc/nginx/sites-enabled files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ nginx_sites_enabled_files.files | default([]) }}"
+  when: nginx_sites_enabled_files.matched | default(0) > 0
+
+- name: Find existing /etc/nginx/sites-available files
+  ansible.builtin.find:
+    paths: /etc/nginx/sites-available
+    file_type: file
+    recurse: false
+  register: nginx_sites_available_files
+  failed_when: false
+
+- name: Remove old /etc/nginx/sites-available files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ nginx_sites_available_files.files | default([]) }}"
+  when: nginx_sites_available_files.matched | default(0) > 0
+
+- name: Ensure required nginx directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ nginx_allowlist_dir }}"
+    - "{{ nginx_sites_enabled }}"
+    - "{{ nginx_sites_available }}"
+
+- name: Deploy nginx main configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: "0644"
+  notify: reload nginx
+
+- name: Deploy nginx log format definitions
+  ansible.builtin.template:
+    src: log_formats.conf.j2
+    dest: "{{ nginx_log_format_file }}"
+    mode: "0644"
+  notify: reload nginx
+
+- name: Deploy nginx allowlist configuration
+  ansible.builtin.template:
+    src: allowlist.conf.j2
+    dest: "{{ nginx_allowlist_dir }}/defaults.conf"
+    mode: "0644"
+  notify: reload nginx
+
+- name: Deploy nginx site configurations
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: "{{ nginx_sites_enabled }}/{{ item.name }}.conf"
+    mode: "0644"
+  loop: "{{ nginx_sites }}"
+  when: nginx_sites | length > 0
+  notify: reload nginx
+
+# Validate before handlers fire — fails the play if config is broken
+- name: Validate nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

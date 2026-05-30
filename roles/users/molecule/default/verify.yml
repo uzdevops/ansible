@@ -1,0 +1,27 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check testuser exists in passwd
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+
+    - name: Check testuser home directory exists
+      ansible.builtin.stat:
+        path: /home/testuser
+      register: home_dir
+      failed_when: not home_dir.stat.isdir
+
+    - name: Validate sudoers file
+      ansible.builtin.command: visudo -cf /etc/sudoers
+      changed_when: false
+
+    - name: Check MOTD file exists
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: motd_stat
+      failed_when: not motd_stat.stat.exists

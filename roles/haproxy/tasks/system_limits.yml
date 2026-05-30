@@ -1,0 +1,29 @@
+---
+- name: Set fs.file-max sysctl
+  ansible.posix.sysctl:
+    name: fs.file-max
+    value: "{{ haproxy_fs_file_max }}"
+    state: present
+    reload: true
+
+- name: Set net.core.somaxconn sysctl
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: "{{ haproxy_somaxconn }}"
+    state: present
+    reload: true
+
+- name: Set net.ipv4.tcp_max_syn_backlog sysctl
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_max_syn_backlog
+    value: "{{ haproxy_tcp_max_syn_backlog }}"
+    state: present
+    reload: true
+
+- name: Configure HAProxy open file limits in limits.conf
+  ansible.builtin.blockinfile:
+    path: /etc/security/limits.conf
+    marker: "# {mark} ANSIBLE MANAGED HAPROXY NOFILE LIMITS"
+    block: |
+      haproxy soft nofile {{ haproxy_limit_nofile }}
+      haproxy hard nofile {{ haproxy_limit_nofile }}

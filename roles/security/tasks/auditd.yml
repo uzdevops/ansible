@@ -1,0 +1,40 @@
+---
+- name: Install auditd (Ubuntu)
+  ansible.builtin.apt:
+    name: auditd
+    state: present
+    update_cache: false
+  when: ansible_os_family == "Debian"
+
+- name: Install auditd (Rocky)
+  ansible.builtin.dnf:
+    name: audit
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure auditd is enabled and running
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: true
+
+- name: Deploy login event audit rules
+  ansible.builtin.template:
+    src: audit-login.rules.j2
+    dest: /etc/audit/rules.d/login-events.rules
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Reload audit rules
+
+- name: Configure auditd log rotation
+  ansible.builtin.lineinfile:
+    path: /etc/audit/auditd.conf
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    state: present
+  loop:
+    - { key: max_log_file,        value: "{{ auditd_max_log_file }}" }
+    - { key: max_log_file_action, value: "{{ auditd_max_log_file_action }}" }
+    - { key: num_logs,            value: "{{ auditd_num_logs }}" }
+  notify: Restart auditd

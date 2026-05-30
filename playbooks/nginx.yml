@@ -1,0 +1,6 @@
+- name: Deploy production-ready Nginx configuration
+  hosts: webservers
+  become: true
+  gather_facts: true
+  roles:
+    - role: nginx

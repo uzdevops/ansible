@@ -1,0 +1,34 @@
+---
+- name: Install packages (Debian)
+  ansible.builtin.apt:
+    name: "{{ packages['Debian'] }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+  tags: [packages]
+
+- name: Symlink batcat to bat (Debian)
+  ansible.builtin.file:
+    src: /usr/bin/batcat
+    dest: /usr/local/bin/bat
+    state: link
+  when: ansible_os_family == "Debian"
+  tags: [packages]
+
+- name: Install packages (RedHat)
+  ansible.builtin.dnf:
+    name: "{{ packages['RedHat'] }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [packages]
+
+- name: Install GitHub binaries
+  ansible.builtin.include_tasks:
+    file: binaries.yml
+  tags: [binaries]
+
+- name: Configure system-wide aliases
+  ansible.builtin.include_tasks:
+    file: aliases.yml
+  tags: [aliases]

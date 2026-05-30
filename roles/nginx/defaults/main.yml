@@ -1,0 +1,43 @@
+---
+nginx_limit_nofile: 65535
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_keepalive_timeout: 65
+nginx_server_tokens: "off"
+nginx_gzip: "on"
+
+# System tuning
+nginx_fs_file_max: 2097152
+nginx_somaxconn: 65535
+nginx_tcp_max_syn_backlog: 65535
+
+nginx_log_formats:
+  - name: main
+    format: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"'
+  - name: json
+    format: |
+      "{\"time\":\"$time_iso8601\",\"remote_addr\":\"$remote_addr\",\"method\":\"$request_method\",
+      \"uri\":\"$request_uri\",\"status\":\"$status\",\"bytes\":\"$body_bytes_sent\",
+      \"referer\":\"$http_referer\",\"ua\":\"$http_user_agent\",\"rt\":\"$request_time\"}"
+
+nginx_allowlist_ips: []
+
+nginx_sites: []
+# Each site object shape:
+# - name: myapp
+#   server_name: example.com
+#   listen_port: 80
+#   listen_ssl: false
+#   ssl_certificate: ""
+#   ssl_certificate_key: ""
+#   root: /var/www/myapp
+#   index: index.html
+#   access_log: /var/log/nginx/myapp_access.log
+#   error_log: /var/log/nginx/myapp_error.log
+#   log_format: json
+#   use_allowlist: false
+#   locations:
+#     - path: /
+#       proxy_pass: ""
+#       extra: ""
+#   extra_config: ""

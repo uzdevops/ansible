@@ -1,0 +1,61 @@
+---
+- name: Include dependency tasks
+  ansible.builtin.include_tasks: dependency.yml
+
+- name: Ensure deploy root directory exists
+  ansible.builtin.file:
+    path: "{{ ROOT }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [dirs]
+
+- name: Create external Docker networks
+  community.docker.docker_network:
+    name: "{{ item['name'] }}"
+    driver: "{{ item['mode'] }}"
+  loop: "{{ NETWORKS }}"
+  when: item.external is defined and item.external
+
+- name: Deploy docker-compose file
+  ansible.builtin.template:
+    src: docker-compose.yaml.j2
+    dest: "{{ ROOT }}/docker-compose.yaml"
+    mode: "0644"
+  tags: [compose]
+
+- name: Check if image uses internal registry
+  ansible.builtin.set_fact:
+    is_harbor_image: "{{ 'harbor.imv.uz' in IMAGE }}"
+
+- name: Docker login to Harbor
+  community.docker.docker_login:
+    registry_url: "{{ HARBOR['URL'] }}"
+    username: "{{ HARBOR['USERNAME'] }}"
+    password: "{{ HARBOR['PASSWD'] }}"
+    state: present
+  no_log: true
+  tags: [login]
+  when: HARBOR_ENABLED and is_harbor_image
+
+- name: Pull service image
+  community.docker.docker_image:
+    name: "{{ IMAGE }}"
+    source: pull
+  tags: [pull]
+
+- name: Deploy stack to Docker Swarm
+  community.docker.docker_stack:
+    name: "{{ STACK_NAME }}"
+    compose:
+      - "{{ ROOT }}/docker-compose.yaml"
+    state: present
+  tags: [stack]
+
+- name: Docker logout from Harbor
+  community.docker.docker_login:
+    registry_url: "{{ HARBOR['URL'] }}"
+    state: absent
+  tags: [login]
+  when: HARBOR_ENABLED and is_harbor_image

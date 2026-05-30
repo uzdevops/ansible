@@ -1,0 +1,41 @@
+# Managed by Ansible — do not edit manually
+# /etc/ssh/sshd_config.d/99-hardening.conf
+
+# === AUTHENTICATION ===
+PermitRootLogin {{ ssh_permit_root_login }}
+PasswordAuthentication {{ ssh_password_authentication }}
+PubkeyAuthentication {{ ssh_pubkey_authentication }}
+AuthorizedKeysFile {{ ssh_authorized_keys_file }}
+PermitEmptyPasswords {{ ssh_permit_empty_passwords }}
+MaxAuthTries {{ ssh_max_auth_tries }}
+LoginGraceTime {{ ssh_login_grace_time }}
+
+# === ACCESS CONTROL ===
+Port {{ ssh_port }}
+ListenAddress {{ ssh_listen_address }}
+AllowUsers {{ ssh_allow_users_final | join(' ') }}
+
+# === SESSION & CONNECTION ===
+ClientAliveInterval {{ ssh_client_alive_interval }}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+MaxSessions {{ ssh_max_sessions }}
+MaxStartups {{ ssh_max_startups }}
+TCPKeepAlive {{ ssh_tcp_keepalive }}
+
+# === CRYPTO ===
+KexAlgorithms {{ ssh_kex_algorithms | join(',') }}
+Ciphers {{ ssh_ciphers | join(',') }}
+MACs {{ ssh_macs | join(',') }}
+HostKeyAlgorithms {{ ssh_host_key_algorithms | join(',') }}
+
+# === LOGGING ===
+LogLevel {{ ssh_log_level }}
+SyslogFacility {{ ssh_syslog_facility }}
+PrintLastLog {{ ssh_print_last_log }}
+
+# === FORWARDING ===
+X11Forwarding {{ ssh_x11_forwarding }}
+AllowAgentForwarding {{ ssh_allow_agent_forwarding }}
+AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}
+GatewayPorts {{ ssh_gateway_ports }}
+PermitTunnel {{ ssh_permit_tunnel }}

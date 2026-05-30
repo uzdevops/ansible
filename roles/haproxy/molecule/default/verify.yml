@@ -1,0 +1,48 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check haproxy.cfg exists
+      ansible.builtin.stat:
+        path: /etc/haproxy/haproxy.cfg
+      register: haproxy_cfg
+      failed_when: not haproxy_cfg.stat.exists
+
+    - name: Check conf.d directory exists
+      ansible.builtin.stat:
+        path: /etc/haproxy/conf.d
+      register: conf_d
+      failed_when: not conf_d.stat.isdir
+
+    - name: Check stats config exists
+      ansible.builtin.stat:
+        path: /etc/haproxy/conf.d/stats.cfg
+      register: stats_cfg
+      failed_when: not stats_cfg.stat.exists
+
+    - name: Check systemd override exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/haproxy.service.d/override.conf
+      register: override_cfg
+      failed_when: not override_cfg.stat.exists
+
+    - name: Check HAProxy log directory exists
+      ansible.builtin.stat:
+        path: /var/log/haproxy
+      register: log_dir
+      failed_when: not log_dir.stat.isdir
+
+    - name: Validate HAProxy configuration
+      ansible.builtin.command: haproxy -c -f /etc/haproxy/haproxy.cfg -f /etc/haproxy/conf.d/
+      changed_when: false
+
+    - name: Check HAProxy service is running
+      ansible.builtin.service_facts:
+
+    - name: Assert HAProxy is active
+      ansible.builtin.assert:
+        that: ansible_facts.services['haproxy.service'].state == 'running'
+        fail_msg: "HAProxy service is not running"

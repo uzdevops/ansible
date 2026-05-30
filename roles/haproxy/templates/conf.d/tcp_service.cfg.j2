@@ -1,0 +1,21 @@
+# Managed by Ansible — do not edit manually
+# Service: {{ item.name }}
+
+frontend {{ item.name }}_frontend
+    bind *:{{ item.frontend_port }}
+    mode tcp
+    option tcplog
+    default_backend {{ item.name }}_backend
+
+backend {{ item.name }}_backend
+    mode tcp
+    balance {{ item.balance | default('roundrobin') }}
+{% if item.timeout_connect is defined %}
+    timeout connect {{ item.timeout_connect }}
+{% endif %}
+{% if item.timeout_server is defined %}
+    timeout server {{ item.timeout_server }}
+{% endif %}
+{% for host in groups[item.inventory_group] %}
+    server {{ host }} {{ hostvars[host]['ansible_host'] | default(hostvars[host]['inventory_hostname']) }}:{{ item.backend_port }} check
+{% endfor %}

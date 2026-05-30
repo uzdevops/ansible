@@ -1,0 +1,13 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    users: []
+    ssh_extra_allow_users:
+      - root
+      - ahmad
+
+  roles:
+    - role: ssh

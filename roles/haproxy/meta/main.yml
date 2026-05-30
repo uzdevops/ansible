@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  role_name: haproxy
+  author: devops
+  description: Installs and configures HAProxy as HTTP/TCP load balancer with inventory-based dynamic backends, optional SSL, stats page, and file-based logging.
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+    - name: Rocky
+      versions:
+        - "10"
+
+dependencies: []

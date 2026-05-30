@@ -1,0 +1,56 @@
+---
+- name: Build AllowUsers list from users variable
+  ansible.builtin.set_fact:
+    ssh_host_users: >-
+      {{ (users | selectattr('servers', 'contains', inventory_hostname) | list
+        + users | selectattr('servers', 'equalto', ['all']) | list
+        ) | unique | map(attribute='name') | list }}
+
+- name: Add group-based users to AllowUsers
+  ansible.builtin.set_fact:
+    ssh_host_users: >-
+      {{ (ssh_host_users
+        + users | selectattr('servers', 'contains', item) | list
+          | map(attribute='name') | list) | unique }}
+  loop: "{{ group_names }}"
+
+- name: Build final AllowUsers list
+  ansible.builtin.set_fact:
+    ssh_allow_users_final: "{{ (ssh_host_users + ssh_extra_allow_users) | unique }}"
+
+- name: Ensure sshd_config.d directory exists
+  ansible.builtin.file:
+    path: /etc/ssh/sshd_config.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Include directive in /etc/ssh/sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "Include /etc/ssh/sshd_config.d/*.conf"
+    insertbefore: BOF
+    state: present
+    backup: true
+
+- name: Deploy SSH hardening config
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart SSH service
+
+- name: Ensure /run/sshd exists for sshd -t validation
+  ansible.builtin.file:
+    path: /run/sshd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Validate sshd config
+  ansible.builtin.command: sshd -t
+  changed_when: false

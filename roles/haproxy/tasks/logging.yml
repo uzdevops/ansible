@@ -1,0 +1,17 @@
+---
+- name: Ensure HAProxy log directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_log_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy rsyslog config for HAProxy
+  ansible.builtin.template:
+    src: rsyslog-haproxy.conf.j2
+    dest: "{{ haproxy_rsyslog_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart rsyslog

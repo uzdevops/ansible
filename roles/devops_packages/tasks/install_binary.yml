@@ -1,0 +1,104 @@
+---
+- name: "{{ binary_item.name }} | Check if already installed"
+  ansible.builtin.stat:
+    path: "{{ binary_install_dir }}/{{ binary_item.name }}"
+  register: binary_stat
+
+- name: "{{ binary_item.name }} | Fetch latest release info"
+  ansible.builtin.uri:
+    url: "{{ github_api_url }}/{{ binary_item.repo }}/releases/latest"
+    return_content: true
+    headers:
+      Accept: "application/vnd.github+json"
+  register: release_info
+  when: not binary_stat.stat.exists
+
+- name: "{{ binary_item.name }} | Resolve matching asset"
+  ansible.builtin.set_fact:
+    binary_asset: >-
+      {{ (release_info.json.assets
+          | selectattr('name', 'search', binary_item.asset_pattern)
+          | list | first) | default({}) }}
+  when: not binary_stat.stat.exists
+
+- name: "{{ binary_item.name }} | Fail if no matching asset found"
+  ansible.builtin.fail:
+    msg: >-
+      No asset matching '{{ binary_item.asset_pattern }}' found in
+      {{ binary_item.repo }} latest release.
+  when:
+    - not binary_stat.stat.exists
+    - binary_asset.browser_download_url is not defined
+
+# ── Direct binary install ─────────────────────────────────────────
+
+- name: "{{ binary_item.name }} | Download binary"
+  ansible.builtin.get_url:
+    url: "{{ binary_asset.browser_download_url }}"
+    dest: "{{ binary_install_dir }}/{{ binary_item.name }}"
+    mode: "0755"
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "binary"
+
+# ── Archive install ───────────────────────────────────────────────
+
+- name: "{{ binary_item.name }} | Download archive"
+  ansible.builtin.get_url:
+    url: "{{ binary_asset.browser_download_url }}"
+    dest: "{{ binary_tmp_dir }}/{{ binary_asset.name }}"
+    mode: "0644"
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+
+- name: "{{ binary_item.name }} | Extract archive"
+  ansible.builtin.unarchive:
+    src: "{{ binary_tmp_dir }}/{{ binary_asset.name }}"
+    dest: "{{ binary_tmp_dir }}"
+    remote_src: true
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+
+- name: "{{ binary_item.name }} | Find extracted binary"
+  ansible.builtin.find:
+    paths: "{{ binary_tmp_dir }}"
+    patterns: "{{ binary_item.binary_path | basename }}"
+    recurse: true
+    file_type: file
+  register: extracted_binary
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+
+- name: "{{ binary_item.name }} | Fail if binary not found in archive"
+  ansible.builtin.fail:
+    msg: >-
+      Binary '{{ binary_item.binary_path }}' not found after extracting
+      {{ binary_asset.name }}.
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+    - extracted_binary.files | length == 0
+
+- name: "{{ binary_item.name }} | Install binary from archive"
+  ansible.builtin.copy:
+    src: "{{ extracted_binary.files[0].path }}"
+    dest: "{{ binary_install_dir }}/{{ binary_item.name }}"
+    mode: "0755"
+    remote_src: true
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+
+- name: "{{ binary_item.name }} | Clean up archive and extracted files"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ binary_tmp_dir }}/{{ binary_asset.name | default('') }}"
+  when:
+    - not binary_stat.stat.exists
+    - binary_item.type == "archive"
+    - binary_asset.name is defined

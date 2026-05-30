@@ -1,0 +1,6 @@
+---
+- name: Apply devops_packages role
+  hosts: all
+  become: true
+  roles:
+    - role: devops_packages

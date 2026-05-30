@@ -1,0 +1,3 @@
+{% for format in nginx_log_formats %}
+log_format {{ format.name }} {{ format.format }};
+{% endfor %}

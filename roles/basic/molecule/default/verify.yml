@@ -1,0 +1,16 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check timezone is Asia/Tashkent
+      ansible.builtin.command: timedatectl show --property=Timezone --value
+      register: tz
+      changed_when: false
+      failed_when: tz.stdout != "Asia/Tashkent"
+
+    - name: Check htop is installed
+      ansible.builtin.command: which htop
+      changed_when: false

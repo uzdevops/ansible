@@ -1,0 +1,16 @@
+---
+- name: Install nginx
+  ansible.builtin.include_tasks: install.yml
+  tags: [nginx, install]
+
+- name: Configure nginx
+  ansible.builtin.include_tasks: config.yml
+  tags: [nginx, config]
+
+- name: Configure logrotate
+  ansible.builtin.include_tasks: logrotate.yml
+  tags: [nginx, logrotate]
+
+- name: Configure system limits
+  ansible.builtin.include_tasks: system_limits.yml
+  tags: [nginx, limits]

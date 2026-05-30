@@ -1,0 +1,8 @@
+---
+- name: Add entries to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ item.value }} {{ item.key }}"
+    state: present
+  loop: "{{ (hosts_entries | default({})) | dict2items }}"
+  when: (hosts_entries | default({})) | length > 0

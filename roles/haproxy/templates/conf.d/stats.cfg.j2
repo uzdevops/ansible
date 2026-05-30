@@ -1,0 +1,14 @@
+# Managed by Ansible — do not edit manually
+
+frontend stats
+    bind *:{{ haproxy_stats_port }}
+    mode http
+    option httplog
+    stats enable
+    stats uri {{ haproxy_stats_uri }}
+    stats realm HAProxy\ Statistics
+    stats auth {{ haproxy_stats_user }}:{{ haproxy_stats_password }}
+    stats refresh 30s
+    stats show-legends
+    stats show-node
+    stats admin if LOCALHOST

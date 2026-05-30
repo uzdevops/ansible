@@ -1,0 +1,21 @@
+---
+- name: Bootstrap server — full DR playbook
+  hosts: all
+  become: true
+  vars:
+    zsh_users: "{{ users | map(attribute='name') | list + ['root'] }}"
+  roles:
+    - role: basic
+      tags: [basic]
+    - role: users
+      tags: [users]
+    - role: ssh
+      tags: [ssh]
+    - role: security
+      tags: [security]
+    - role: docker-install
+      tags: [docker]
+    - role: devops_packages
+      tags: [packages]
+    - role: zsh
+      tags: [zsh]

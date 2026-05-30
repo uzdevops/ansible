@@ -1,0 +1,41 @@
+---
+default_shell: /bin/zsh
+
+users:
+  - name: ahmad
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - ahmad
+
+  - name: sardor.ergashev
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - sardor.ergashev
+
+  - name: zokir
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - zokir
+
+  - name: abbos
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - abbos
+
+  - name: bahrom
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - bahrom
+
+user_groups: []
+
+users_to_keep:
+  - root
+  - ubuntu
+  - centos
+  - ahmad

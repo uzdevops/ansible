@@ -1,0 +1,52 @@
+---
+- name: Ensure conf.d directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_conf_d_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure SSL certs directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_ssl_cert_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  when: >
+    haproxy_ssl_enabled or
+    (haproxy_http_services | selectattr('ssl_enabled', 'defined')
+     | selectattr('ssl_enabled') | list | length > 0)
+
+- name: Ensure HAProxy chroot directory exists
+  ansible.builtin.file:
+    path: "{{ haproxy_chroot }}"
+    state: directory
+    owner: haproxy
+    group: haproxy
+    mode: "0755"
+
+- name: Deploy main haproxy.cfg (global + defaults)
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: "{{ haproxy_main_cfg }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload haproxy
+
+- name: Create systemd override directory
+  ansible.builtin.file:
+    path: "{{ haproxy_systemd_override_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Deploy systemd override (conf.d/ + LimitNOFILE)
+  ansible.builtin.template:
+    src: systemd_override.conf.j2
+    dest: "{{ haproxy_systemd_override_dir }}/override.conf"
+    mode: "0644"
+  notify:
+    - reload systemd daemon
+    - restart haproxy

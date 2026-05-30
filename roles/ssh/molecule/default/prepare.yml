@@ -1,0 +1,23 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install OpenSSH server
+      ansible.builtin.package:
+        name: openssh-server
+        state: present
+
+    - name: Ensure SSH service is running (Debian)
+      ansible.builtin.service:
+        name: ssh
+        state: started
+        enabled: true
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure SSH service is running (RedHat)
+      ansible.builtin.service:
+        name: sshd
+        state: started
+        enabled: true
+      when: ansible_os_family == "RedHat"

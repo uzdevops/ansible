@@ -1,0 +1,14 @@
+/var/log/nginx/*.log {
+  daily
+  rotate 14
+  compress
+  delaycompress
+  missingok
+  notifempty
+  sharedscripts
+  postrotate
+    if [ -f /run/nginx.pid ]; then
+      nginx -s reopen
+    fi
+  endscript
+}

@@ -1,0 +1,8 @@
+# Managed by Ansible — do not edit manually
+# Modern CLI tool aliases
+
+{% for original, replacement in cli_aliases.items() %}
+if command -v {{ replacement }} &>/dev/null; then
+  alias {{ original }}='{{ replacement }}'
+fi
+{% endfor %}

@@ -1,0 +1,30 @@
+---
+- name: Apply sysctl hardening
+  ansible.builtin.include_tasks:
+    file: sysctl.yml
+  tags: [sysctl, hardening]
+
+- name: Block USB storage
+  ansible.builtin.include_tasks:
+    file: usb.yml
+  tags: [usb, hardening]
+
+- name: Harden /tmp and /var/tmp mounts
+  ansible.builtin.include_tasks:
+    file: tmp_mount.yml
+  tags: [tmp, hardening]
+
+- name: Disable unnecessary services
+  ansible.builtin.include_tasks:
+    file: services.yml
+  tags: [services, hardening]
+
+- name: Configure password and sudo policy
+  ansible.builtin.include_tasks:
+    file: password_policy.yml
+  tags: [password, hardening]
+
+- name: Configure auditd
+  ansible.builtin.include_tasks:
+    file: auditd.yml
+  tags: [audit, hardening]

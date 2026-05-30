@@ -1,0 +1,46 @@
+---
+- name: Install HAProxy
+  ansible.builtin.include_tasks: install.yml
+  tags: [haproxy, install]
+
+- name: Configure HAProxy base
+  ansible.builtin.include_tasks: configure.yml
+  tags: [haproxy, config]
+
+- name: Configure service frontends and backends
+  ansible.builtin.include_tasks: services.yml
+  tags: [haproxy, config, services]
+
+- name: Configure SSL certificates
+  ansible.builtin.include_tasks: ssl.yml
+  tags: [haproxy, config, ssl]
+  when: >
+    haproxy_ssl_enabled or
+    (haproxy_http_services | selectattr('ssl_enabled', 'defined')
+     | selectattr('ssl_enabled') | list | length > 0)
+
+- name: Configure stats frontend
+  ansible.builtin.include_tasks: stats.yml
+  tags: [haproxy, config, stats]
+  when: haproxy_stats_enabled
+
+# Validate full config (global + conf.d/) before any handler fires
+- name: Validate HAProxy configuration
+  ansible.builtin.command: "haproxy -c -f {{ haproxy_main_cfg }} -f {{ haproxy_conf_d_dir }}/"
+  changed_when: false
+  tags: [haproxy, config]
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Configure logging
+  ansible.builtin.include_tasks: logging.yml
+  tags: [haproxy, logging]
+
+- name: Configure logrotate
+  ansible.builtin.include_tasks: logrotate.yml
+  tags: [haproxy, logrotate]
+
+- name: Configure system limits
+  ansible.builtin.include_tasks: system_limits.yml
+  tags: [haproxy, limits]

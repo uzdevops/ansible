@@ -1,0 +1,6 @@
+---
+- name: Apply compose-deploy role
+  hosts: all
+  become: true
+  roles:
+    - role: compose-deploy

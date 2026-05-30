@@ -1,0 +1,34 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check zsh is installed
+      ansible.builtin.command: which zsh
+      changed_when: false
+
+    - name: Check oh-my-zsh is installed for testuser
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh
+      register: ohmyzsh
+      failed_when: not ohmyzsh.stat.isdir
+
+    - name: Check .zshrc is deployed
+      ansible.builtin.stat:
+        path: /home/testuser/.zshrc
+      register: zshrc
+      failed_when: not zshrc.stat.exists
+
+    - name: Check zsh-autosuggestions plugin is installed
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      register: autosuggestions
+      failed_when: not autosuggestions.stat.isdir
+
+    - name: Check zsh-syntax-highlighting plugin is installed
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+      register: syntax_hl
+      failed_when: not syntax_hl.stat.isdir

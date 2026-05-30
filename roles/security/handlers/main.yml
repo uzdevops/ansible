@@ -1,0 +1,43 @@
+---
+- name: Reload sysctl
+  ansible.builtin.command: sysctl --system
+  changed_when: false
+  listen: Reload sysctl
+
+- name: Update initramfs (Ubuntu)
+  ansible.builtin.command: update-initramfs -u
+  when: ansible_os_family == "Debian"
+  listen: Update initramfs
+
+- name: Update initramfs (Rocky)
+  ansible.builtin.command: dracut -f
+  when: ansible_os_family == "RedHat"
+  listen: Update initramfs
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: Reload systemd daemon
+
+- name: Remount tmp
+  ansible.builtin.systemd:
+    name: tmp.mount
+    state: restarted
+  listen: Remount tmp
+
+- name: Remount var-tmp
+  ansible.builtin.systemd:
+    name: var-tmp.mount
+    state: restarted
+  listen: Remount var-tmp
+
+- name: Reload audit rules
+  ansible.builtin.command: augenrules --load
+  changed_when: false
+  listen: Reload audit rules
+
+- name: Restart auditd
+  ansible.builtin.service:
+    name: auditd
+    state: restarted
+  listen: Restart auditd

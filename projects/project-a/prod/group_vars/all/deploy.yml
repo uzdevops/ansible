@@ -1,0 +1,23 @@
+---
+SERVICE_NAME: project-a-backend
+IMAGE: harbor.imv.uz/project-a/backend:latest
+STACK_NAME: project-a
+HARBOR_ENABLED: true
+
+ENVIRONMENTS:
+  TZ: "Asia/Tashkent"
+  DB_HOST: "10.0.2.20"
+  DB_PASSWORD: "{{ vault_db_password }}"
+
+PORTS:
+  - target: 8080
+    published: 8080
+    protocol: tcp
+
+RESOURCES:
+  limits:
+    cpus: "2.0"
+    memory: 1G
+  reservations:
+    cpus: "1.0"
+    memory: 512M

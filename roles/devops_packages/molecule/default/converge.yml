@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    # Limit to one binary to keep test time reasonable
+    binaries:
+      - name: yq
+        repo: mikefarah/yq
+        asset_pattern: "^yq_linux_amd64$"
+        type: binary
+
+  roles:
+    - role: devops_packages

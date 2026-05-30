@@ -1,0 +1,3 @@
+ansible_user: ahmad
+ansible_password: "123"
+test_variable: "This is a test variable for vm-os"

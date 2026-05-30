@@ -1,0 +1,39 @@
+# Managed by Ansible — do not edit manually
+
+# Remove all existing rules and set buffer size
+-D
+-b 8192
+-f 1
+
+# ── Identity files ───────────────────────────────────────────────
+-w /etc/passwd  -p wa -k identity
+-w /etc/shadow  -p wa -k identity
+-w /etc/group   -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+
+# ── Login / logout ───────────────────────────────────────────────
+-w /var/log/lastlog    -p wa -k logins
+-w /var/run/faillock   -p wa -k logins
+
+# ── PAM session events (ssh login/logout, su) ────────────────────
+-w /etc/pam.d/sshd   -p wa -k pam_session
+-w /etc/pam.d/su     -p wa -k pam_session
+-w /etc/pam.d/sudo   -p wa -k pam_session
+
+# ── Privilege escalation ─────────────────────────────────────────
+-w /usr/bin/sudo -p x -k priv_esc
+-w /bin/su       -p x -k priv_esc
+
+# ── User & group management commands ────────────────────────────
+-w /usr/sbin/useradd  -p x -k user_mgmt
+-w /usr/sbin/usermod  -p x -k user_mgmt
+-w /usr/sbin/userdel  -p x -k user_mgmt
+-w /usr/sbin/groupadd -p x -k user_mgmt
+-w /usr/sbin/groupmod -p x -k user_mgmt
+-w /usr/sbin/groupdel -p x -k user_mgmt
+
+# ── Failed access (permission denied) ───────────────────────────
+-a always,exit -F arch=b64 -S open -F exit=-EACCES  -k failed_access
+-a always,exit -F arch=b32 -S open -F exit=-EACCES  -k failed_access
+-a always,exit -F arch=b64 -S open -F exit=-EPERM   -k failed_access
+-a always,exit -F arch=b32 -S open -F exit=-EPERM   -k failed_access

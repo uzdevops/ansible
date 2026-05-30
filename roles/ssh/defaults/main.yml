@@ -1,0 +1,62 @@
+---
+# === AUTHENTICATION ===
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+ssh_pubkey_authentication: "yes"
+ssh_authorized_keys_file: ".ssh/authorized_keys"
+ssh_permit_empty_passwords: "no"
+ssh_max_auth_tries: 3
+ssh_login_grace_time: 30
+
+# === ACCESS CONTROL ===
+ssh_port: 22
+ssh_listen_address: "0.0.0.0"
+# Users from `users` variable are added automatically.
+# Add extra system/service accounts here if needed.
+ssh_extra_allow_users: []
+#  - deploy
+#  - ansible
+#  - gitlab-runner
+
+# === SESSION & CONNECTION ===
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_max_sessions: 5
+ssh_max_startups: "10:30:60"
+ssh_tcp_keepalive: "no"
+
+# === CRYPTO ===
+ssh_kex_algorithms:
+  - curve25519-sha256
+  - diffie-hellman-group14-sha256
+  - diffie-hellman-group14-sha1
+
+ssh_ciphers:
+  - aes256-gcm@openssh.com
+  - chacha20-poly1305@openssh.com
+
+ssh_macs:
+  - hmac-sha2-256
+  - hmac-sha2-512
+  - hmac-sha1
+
+ssh_host_key_algorithms:
+  - ssh-ed25519
+  - rsa-sha2-512
+
+# === LOGGING ===
+ssh_log_level: VERBOSE
+ssh_syslog_facility: AUTH
+ssh_print_last_log: "yes"
+
+# === FORWARDING ===
+ssh_x11_forwarding: "no"
+ssh_allow_agent_forwarding: "no"
+ssh_allow_tcp_forwarding: "no"
+ssh_gateway_ports: "no"
+ssh_permit_tunnel: "no"
+
+# users variable — same format as users role.
+# Populated here so the role can work standalone.
+# In practice, defined in group_vars alongside the users role.
+users: []

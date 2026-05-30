@@ -1,0 +1,6 @@
+---
+- name: Login to Harbor registry
+  hosts: all
+  become: true
+  roles:
+    - role: harbor-login

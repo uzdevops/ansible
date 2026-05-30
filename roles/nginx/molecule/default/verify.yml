@@ -1,0 +1,30 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Validate nginx configuration
+      ansible.builtin.command: nginx -t
+      changed_when: false
+
+    - name: Check site config exists
+      ansible.builtin.stat:
+        path: /etc/nginx/sites-enabled/test-site.conf
+      register: site_conf
+      failed_when: not site_conf.stat.exists
+
+    - name: Check log format config exists
+      ansible.builtin.stat:
+        path: /etc/nginx/log_formats.conf
+      register: log_fmt
+      failed_when: not log_fmt.stat.exists
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert nginx is running
+      ansible.builtin.assert:
+        that: ansible_facts.services['nginx.service'].state == 'running'
+        fail_msg: "nginx service is not running"

@@ -1,0 +1,23 @@
+---
+- name: Ensure binary temp dir exists
+  ansible.builtin.file:
+    path: "{{ binary_tmp_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Install GitHub binaries
+  ansible.builtin.include_tasks:
+    file: install_binary.yml
+  loop: "{{ binaries }}"
+  loop_control:
+    loop_var: binary_item
+    label: "{{ binary_item.name }}"
+
+- name: Install RedHat-only GitHub binaries
+  ansible.builtin.include_tasks:
+    file: install_binary.yml
+  loop: "{{ binaries_redhat }}"
+  loop_control:
+    loop_var: binary_item
+    label: "{{ binary_item.name }}"
+  when: ansible_os_family == "RedHat"

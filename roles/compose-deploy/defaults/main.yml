@@ -1,0 +1,72 @@
+---
+SERVICE_NAME: myservice
+IMAGE: nginx:latest
+STACK_NAME: mystack
+ROOT: "/var/docker-dir/{{ SERVICE_NAME }}"
+
+PORTS: []
+# PORTS:
+#   - target: 8080
+#     published: 8080
+#     protocol: tcp
+
+ENVIRONMENTS: {}
+# ENVIRONMENTS:
+#   TZ: "Asia/Tashkent"
+#   PUBLISH_PORT: "8080"
+
+HARBOR_ENABLED: true
+HARBOR:
+  URL: "{{ main_secrets['harbor']['url'] }}"
+  USERNAME: "{{ main_secrets['harbor']['username'] }}"
+  PASSWD: "{{ main_secrets['harbor']['password'] }}"
+
+NETWORKS: []
+# NETWORKS:
+#   - name: frontend-net
+#     mode: overlay
+#     external: true
+#   - name: backend-net
+#     mode: bridge
+
+HEALTHCHECK: {}
+# HEALTHCHECK:
+#   interval: 1m
+#   timeout: 5s
+#   retries: 2
+#   start_period: 1m
+#   test: "curl http://localhost:8080/health"
+
+VOLUME: []
+# VOLUME:
+#   - src: /var/docker-dir/myservice/data
+#     dest: /data
+#     mount: true
+
+VOLUMES: []
+# Named / NFS volumes (top-level volumes: section)
+# VOLUMES:
+#   - name: nfs-data
+#     type: nfs
+#     o: "addr=192.168.1.10,rw"
+#     device: ":/exports/data"
+
+COMMAND: []
+EXTRA_HOSTS: []
+
+REPLICA: 1
+PARALLELISM: 2
+DELAY: 10s
+RESTART_POLICY: any
+
+RESOURCES:
+  limits:
+    cpus: "1.0"
+    memory: 256M
+  reservations:
+    cpus: "0.5"
+    memory: 256M
+
+# DEPLOY_MODE: global
+# PLACEMENT:
+#   constraints: "node.platform.os == linux"

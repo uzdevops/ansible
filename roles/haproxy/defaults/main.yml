@@ -1,0 +1,69 @@
+---
+# ── Global ────────────────────────────────────────────────────────
+haproxy_maxconn: 50000
+haproxy_nbthread: auto
+
+# ── Timeouts ──────────────────────────────────────────────────────
+haproxy_timeout_connect: "5s"
+haproxy_timeout_client: "50s"
+haproxy_timeout_server: "50s"
+haproxy_timeout_http_request: "10s"
+haproxy_timeout_http_keep_alive: "2s"
+haproxy_timeout_queue: "30s"
+haproxy_timeout_tunnel: "1h"
+
+# ── SSL ───────────────────────────────────────────────────────────
+haproxy_ssl_enabled: false
+haproxy_ssl_cert_dir: /etc/haproxy/certs
+haproxy_ssl_min_version: TLSv1.2
+haproxy_ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+
+# List of PEM files (combined cert+key) to copy from the playbook's files/ dir
+haproxy_ssl_certs: []
+# haproxy_ssl_certs:
+#   - myapp.pem
+
+# ── Stats ─────────────────────────────────────────────────────────
+haproxy_stats_enabled: true
+haproxy_stats_port: 8404
+haproxy_stats_uri: /stats
+haproxy_stats_user: admin
+haproxy_stats_password: "changeme"
+
+# ── Services ──────────────────────────────────────────────────────
+haproxy_http_services: []
+# haproxy_http_services:
+#   - name: myapp
+#     frontend_port: 80
+#     ssl_enabled: false       # per-service SSL (needs PEM in haproxy_ssl_cert_dir)
+#     ssl_redirect: true       # redirect http→https when ssl_enabled
+#     inventory_group: web_servers
+#     backend_port: 8080
+#     balance: roundrobin      # roundrobin | leastconn | source | uri
+#     health_check: true
+#     health_check_path: /health
+#     health_check_interval: "5s"
+#     timeout_connect: "5s"    # optional per-backend override
+#     timeout_server: "30s"
+
+haproxy_tcp_services: []
+# haproxy_tcp_services:
+#   - name: postgres
+#     frontend_port: 5432
+#     inventory_group: db_servers
+#     backend_port: 5432
+#     balance: source
+#     timeout_connect: "5s"
+#     timeout_server: "1m"
+
+# ── Logging ───────────────────────────────────────────────────────
+haproxy_log_dir: /var/log/haproxy
+haproxy_log_file: /var/log/haproxy/haproxy.log
+haproxy_log_facility: local0
+haproxy_log_level: info
+
+# ── System limits ─────────────────────────────────────────────────
+haproxy_limit_nofile: 200000
+haproxy_fs_file_max: 2097152
+haproxy_somaxconn: 65535
+haproxy_tcp_max_syn_backlog: 65535

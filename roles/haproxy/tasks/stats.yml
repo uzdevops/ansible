@@ -1,0 +1,9 @@
+---
+- name: Deploy stats frontend config
+  ansible.builtin.template:
+    src: conf.d/stats.cfg.j2
+    dest: "{{ haproxy_conf_d_dir }}/stats.cfg"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload haproxy

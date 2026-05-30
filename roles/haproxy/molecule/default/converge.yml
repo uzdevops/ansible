@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    haproxy_http_services:
+      - name: test_http
+        frontend_port: 80
+        inventory_group: all
+        backend_port: 8080
+        balance: roundrobin
+        health_check: false
+
+  roles:
+    - role: haproxy

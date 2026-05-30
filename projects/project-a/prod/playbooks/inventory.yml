@@ -1,0 +1,25 @@
+---
+- name: Bootstrap project-a prod servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Run basic role
+      ansible.builtin.include_role:
+        name: basic
+
+    - name: Run users role
+      ansible.builtin.include_role:
+        name: users
+
+    - name: Run ssh role
+      ansible.builtin.include_role:
+        name: ssh
+
+    - name: Run security role
+      ansible.builtin.include_role:
+        name: security
+
+    - name: Run zsh role
+      ansible.builtin.include_role:
+        name: zsh

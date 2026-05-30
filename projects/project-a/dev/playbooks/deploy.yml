@@ -1,0 +1,6 @@
+---
+- name: Deploy project-a services
+  hosts: all
+  become: true
+  roles:
+    - role: compose-deploy

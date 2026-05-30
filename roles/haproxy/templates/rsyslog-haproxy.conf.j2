@@ -1,0 +1,5 @@
+# Managed by Ansible — do not edit manually
+# Route HAProxy logs to a dedicated file
+
+:programname, startswith, "haproxy" {{ haproxy_log_file }}
+& stop

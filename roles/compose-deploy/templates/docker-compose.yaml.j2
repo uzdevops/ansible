@@ -1,0 +1,123 @@
+# Ansible managed
+services:
+  {{ SERVICE_NAME }}:
+    image: {{ IMAGE }}
+{% if PORTS | default([]) | length > 0 %}
+    ports:
+{% for p in PORTS %}
+      - target: {{ p['target'] }}
+{% if p['published'] is defined %}
+        published: {{ p['published'] }}
+{% endif %}
+        protocol: {{ p['protocol'] }}
+{% endfor %}
+{% endif %}
+{% if ENVIRONMENTS | default({}) | length > 0 %}
+    environment:
+{% for key, value in ENVIRONMENTS.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if TTY is defined %}
+    tty: {{ TTY }}
+{% endif %}
+{% if WORKING_DIR is defined %}
+    working_dir: {{ WORKING_DIR }}
+{% endif %}
+{% if NETWORK_MODE is defined and NETWORK_MODE == 'host' %}
+    network_mode: host
+{% elif NETWORKS | default([]) | length > 0 %}
+    networks:
+{% for n in NETWORKS %}
+      - {{ n['name'] }}
+{% endfor %}
+{% endif %}
+{% if PID is defined %}
+    pid: {{ PID }}
+{% endif %}
+{% if PRIVILEGED is defined and PRIVILEGED %}
+    privileged: true
+{% endif %}
+{% if HEALTHCHECK is defined and HEALTHCHECK.test is defined %}
+    healthcheck:
+      test: ["CMD-SHELL", "{{ HEALTHCHECK['test'] }}"]
+      interval: {{ HEALTHCHECK['interval'] | default('1m') }}
+      timeout: {{ HEALTHCHECK['timeout'] | default('10s') }}
+      retries: {{ HEALTHCHECK['retries'] | default(3) }}
+      start_period: {{ HEALTHCHECK['start_period'] | default('1m') }}
+{% endif %}
+{% if VOLUME | default([]) | length > 0 %}
+    volumes:
+{% for v in VOLUME %}
+{% if v['mount'] | default(true) | bool %}
+      - {{ v['src'] }}:{{ v['dest'] }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if COMMAND | default([]) | length > 0 %}
+    command: {{ COMMAND }}
+{% endif %}
+{% if EXTRA_HOSTS | default([]) | length > 0 %}
+    extra_hosts: {{ EXTRA_HOSTS }}
+{% endif %}
+    deploy:
+{% if DEPLOY_MODE is defined %}
+      mode: {{ DEPLOY_MODE }}
+      placement:
+        constraints: [{{ PLACEMENT['constraints'] }}]
+{% else %}
+      replicas: {{ REPLICA | default(1) }}
+      update_config:
+        parallelism: {{ PARALLELISM }}
+        delay: {{ DELAY }}
+{% if FAILURE_ACTION is defined %}
+        failure_action: {{ FAILURE_ACTION }}
+{% endif %}
+{% if MONITOR is defined %}
+        monitor: {{ MONITOR }}
+{% endif %}
+{% if ORDER is defined %}
+        order: {{ ORDER }}
+{% endif %}
+      restart_policy:
+        condition: {{ RESTART_POLICY }}
+        delay: 5s
+        max_attempts: 3
+{% if WINDOW is defined %}
+        window: {{ WINDOW }}
+{% endif %}
+{% endif %}
+{% if RESOURCES is defined and RESOURCES.limits is defined %}
+      resources:
+        limits:
+          cpus: '{{ RESOURCES['limits']['cpus'] | default('1.0') }}'
+          memory: {{ RESOURCES['limits']['memory'] | default('256M') }}
+        reservations:
+          cpus: '{{ RESOURCES['reservations']['cpus'] | default('0.5') }}'
+          memory: {{ RESOURCES['reservations']['memory'] | default('256M') }}
+{% endif %}
+
+{% if VOLUMES | default([]) | length > 0 %}
+volumes:
+{% for v in VOLUMES %}
+{% if v['type'] is defined and v['type'] == 'nfs' %}
+  {{ v['name'] }}:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: {{ v['o'] }}
+      device: "{{ v['device'] }}"
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if NETWORKS | default([]) | length > 0 and NETWORK_MODE is not defined %}
+networks:
+{% for n in NETWORKS %}
+  {{ n['name'] }}:
+{% if n['external'] | default(false) | bool %}
+    external: true
+{% else %}
+    driver: {{ n['mode'] }}
+{% endif %}
+{% endfor %}
+{% endif %}

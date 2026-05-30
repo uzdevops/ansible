@@ -1,0 +1,17 @@
+---
+- name: Blacklist usb-storage kernel module
+  ansible.builtin.copy:
+    content: "blacklist usb-storage\n"
+    dest: /etc/modprobe.d/usb-storage.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when: usb_storage_blacklist
+  notify: Update initramfs
+
+- name: Unload usb-storage module if currently loaded
+  ansible.builtin.command: modprobe -r usb-storage
+  register: modprobe_result
+  failed_when: false
+  changed_when: modprobe_result.rc == 0
+  when: usb_storage_blacklist

@@ -1,0 +1,27 @@
+---
+# tasks file for karen.basic
+- name: Include package tasks
+  ansible.builtin.include_tasks:
+    file: packages.yml
+  tags:
+    - packages
+
+- name: Set timezone and NTP
+  ansible.builtin.include_tasks:
+    file: timezone.yml
+  tags:
+    - timezone
+
+- name: Include hostname tasks
+  ansible.builtin.include_tasks:
+    file: hostname.yml
+  tags:
+    - hostname_task
+    - hosts
+
+- name: Include new hosts to /etc/hosts tasks
+  ansible.builtin.include_tasks:
+    file: hosts_entries.yml
+  tags:
+    - hosts_entries
+    - hosts

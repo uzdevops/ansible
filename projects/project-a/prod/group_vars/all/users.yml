@@ -1,0 +1,23 @@
+---
+users:
+  - name: ahmad
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - ahmad
+  - name: xasan
+    servers: ['all']
+    sudo_user: true
+    ssh_keys:
+      - xasan
+  - name: xusan
+    servers: ['all']
+    sudo_user: false
+    ssh_keys:
+      - xusan
+
+zsh_users:
+  - root
+  - ahmad
+  - xasan
+  - xusan

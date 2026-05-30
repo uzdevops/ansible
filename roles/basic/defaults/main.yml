@@ -1,0 +1,11 @@
+---
+timezone: "Asia/Tashkent"
+update_repo: true
+selinux_disable: true
+additional_packages:
+  - htop
+  - mc
+  - netcat
+
+# Falls back to ansible_default_ipv4.address if not set in inventory
+infra_public_ip: "{{ ansible_default_ipv4.address }}"

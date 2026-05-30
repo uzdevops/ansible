@@ -1,0 +1,6 @@
+---
+- name: Apply security role
+  hosts: all
+  become: true
+  roles:
+    - role: security

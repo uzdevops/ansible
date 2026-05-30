@@ -1,0 +1,8 @@
+---
+galaxy_info:
+  role_name: harbor_login
+  author: imv-devops
+  description: Login to Harbor container registry
+  min_ansible_version: "2.15"
+collections:
+  - community.docker

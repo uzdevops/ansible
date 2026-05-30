@@ -1,0 +1,17 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    SERVICE_NAME: test-app
+    IMAGE: nginx:latest
+    STACK_NAME: test-stack
+    HARBOR_ENABLED: false
+    PORTS:
+      - target: 80
+        published: 8080
+        protocol: tcp
+
+  roles:
+    - role: compose-deploy

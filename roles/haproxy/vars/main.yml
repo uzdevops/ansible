@@ -1,0 +1,8 @@
+---
+haproxy_conf_dir: /etc/haproxy
+haproxy_conf_d_dir: /etc/haproxy/conf.d
+haproxy_main_cfg: /etc/haproxy/haproxy.cfg
+haproxy_chroot: /var/lib/haproxy
+haproxy_systemd_override_dir: /etc/systemd/system/haproxy.service.d
+haproxy_rsyslog_conf: /etc/rsyslog.d/49-haproxy.conf
+haproxy_logrotate_conf: /etc/logrotate.d/haproxy

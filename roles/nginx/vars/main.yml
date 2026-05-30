@@ -1,0 +1,8 @@
+nginx_conf_dir: /etc/nginx
+nginx_sites_enabled: /etc/nginx/sites-enabled
+nginx_sites_available: /etc/nginx/sites-available
+nginx_allowlist_dir: /etc/nginx/allowlist
+nginx_log_format_file: /etc/nginx/log_formats.conf
+nginx_systemd_override_dir: /etc/systemd/system/nginx.service.d
+nginx_user: "{{ 'www-data' if ansible_os_family == 'Debian' else 'nginx' }}"
+nginx_group: "{{ nginx_user }}"

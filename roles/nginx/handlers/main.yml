@@ -1,0 +1,19 @@
+---
+- name: Reload nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  ignore_errors: "{{ ansible_check_mode }}"
+  listen: reload nginx
+
+- name: Restart nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+  ignore_errors: "{{ ansible_check_mode }}"
+  listen: restart nginx
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  listen: reload systemd daemon

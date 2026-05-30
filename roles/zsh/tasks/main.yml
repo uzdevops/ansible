@@ -1,0 +1,33 @@
+---
+- name: Install zsh
+  ansible.builtin.package:
+    name: zsh
+    state: present
+  tags: [zsh]
+
+- name: Detect zsh path
+  ansible.builtin.command: which zsh
+  register: detected_zsh
+  changed_when: false
+  ignore_errors: true
+  tags: [zsh]
+
+- name: Set zsh_path fact
+  ansible.builtin.set_fact:
+    zsh_path: "{{ detected_zsh.stdout | default(default_zsh_path) }}"
+  tags: [zsh]
+
+- name: Ensure zsh is listed in /etc/shells
+  ansible.builtin.lineinfile:
+    path: /etc/shells
+    line: "{{ zsh_path }}"
+    state: present
+  tags: [zsh]
+
+- name: Apply Oh My Zsh setup for each user
+  ansible.builtin.include_tasks:
+    file: per_user.yml
+  loop: "{{ zsh_users }}"
+  loop_control:
+    loop_var: target_user
+  tags: [zsh]

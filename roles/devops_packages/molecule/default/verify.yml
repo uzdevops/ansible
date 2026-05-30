@@ -1,0 +1,20 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Check yq binary is installed
+      ansible.builtin.command: yq --version
+      changed_when: false
+
+    - name: Check htop is installed
+      ansible.builtin.command: which htop
+      changed_when: false
+
+    - name: Check system-wide aliases file exists
+      ansible.builtin.stat:
+        path: /etc/profile.d/modern-cli.sh
+      register: aliases_file
+      failed_when: not aliases_file.stat.exists

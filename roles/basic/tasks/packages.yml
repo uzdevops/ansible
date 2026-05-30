@@ -1,0 +1,58 @@
+---
+- name: Update cache for CentOS 8 (vault workaround)
+  ansible.builtin.shell: |
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "8"
+  changed_when: false
+
+- name: Update all packages (RedHat)
+  ansible.builtin.yum:
+    name: "*"
+    state: latest
+    update_cache: true
+  when:
+    - ansible_os_family == "RedHat"
+    - update_repo
+
+- name: Update all packages (Debian)
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: true
+  when:
+    - ansible_os_family == "Debian"
+    - update_repo
+
+- name: Install EPEL (RedHat)
+  ansible.builtin.yum:
+    name: epel-release
+    state: present
+  when: ansible_os_family == "RedHat"
+  tags: [packages]
+
+- name: Install additional packages
+  ansible.builtin.package:
+    name: "{{ additional_packages }}"
+    state: present
+  tags: [packages]
+
+- name: Disable SELinux
+  ansible.posix.selinux:
+    policy: targeted
+    state: disabled
+  when:
+    - ansible_os_family == "RedHat"
+    - selinux_disable
+  register: selinux_result
+  tags: [selinux]
+
+- name: Reboot if SELinux state changed
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+  when:
+    - selinux_result is defined
+    - selinux_result.reboot_required | default(false)
+  tags: [selinux]

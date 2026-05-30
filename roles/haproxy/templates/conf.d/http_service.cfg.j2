@@ -1,0 +1,31 @@
+# Managed by Ansible — do not edit manually
+# Service: {{ item.name }}
+
+frontend {{ item.name }}_frontend
+    bind *:{{ item.frontend_port }}{% if item.ssl_enabled | default(false) %} ssl crt {{ haproxy_ssl_cert_dir }}/{{ item.name }}.pem ssl-min-ver {{ haproxy_ssl_min_version }} ciphers {{ haproxy_ssl_ciphers }}{% endif %}
+
+    mode http
+    option httplog
+    option forwardfor
+    http-request set-header X-Forwarded-Proto https if { ssl_fc }
+{% if item.ssl_enabled | default(false) and item.ssl_redirect | default(true) %}
+    http-request redirect scheme https code 301 unless { ssl_fc }
+{% endif %}
+    default_backend {{ item.name }}_backend
+
+backend {{ item.name }}_backend
+    mode http
+    balance {{ item.balance | default('roundrobin') }}
+{% if item.health_check | default(false) %}
+    option httpchk GET {{ item.health_check_path | default('/') }}
+{% endif %}
+{% if item.timeout_connect is defined %}
+    timeout connect {{ item.timeout_connect }}
+{% endif %}
+{% if item.timeout_server is defined %}
+    timeout server {{ item.timeout_server }}
+{% endif %}
+{% for host in groups[item.inventory_group] %}
+    server {{ host }} {{ hostvars[host]['ansible_host'] | default(hostvars[host]['inventory_hostname']) }}:{{ item.backend_port }} check{% if item.health_check | default(false) %} inter {{ item.health_check_interval | default('5s') }}{% endif %}
+
+{% endfor %}

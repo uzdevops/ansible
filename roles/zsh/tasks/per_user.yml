@@ -1,0 +1,60 @@
+---
+- name: Check if user {{ target_user }} exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ target_user }}"
+  register: user_entry
+  ignore_errors: true
+
+- name: Setup Oh My Zsh for {{ target_user }}
+  when: not user_entry.failed
+  block:
+    - name: Set home directory
+      ansible.builtin.set_fact:
+        user_home: "{{ (target_user == 'root') | ternary('/root', '/home/' ~ target_user) }}"
+
+    - name: Change default shell to zsh
+      ansible.builtin.user:
+        name: "{{ target_user }}"
+        shell: "{{ zsh_path }}"
+
+    - name: Check if Oh My Zsh is already installed
+      ansible.builtin.stat:
+        path: "{{ user_home }}/.oh-my-zsh"
+      register: ohmyzsh_dir
+
+    - name: Install Oh My Zsh
+      ansible.builtin.shell: |
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+      args:
+        executable: /bin/bash
+      environment:
+        RUNZSH: "no"
+      become_user: "{{ target_user }}"
+      when:
+        - not ansible_check_mode
+        - not ohmyzsh_dir.stat.exists
+
+    - name: Clone zsh-autosuggestions plugin
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions.git
+        dest: "{{ user_home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+        version: master
+        update: false
+      become_user: "{{ target_user }}"
+
+    - name: Clone zsh-syntax-highlighting plugin
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+        dest: "{{ user_home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+        version: master
+        update: false
+      become_user: "{{ target_user }}"
+
+    - name: Deploy .zshrc
+      ansible.builtin.template:
+        src: zshrc.j2
+        dest: "{{ user_home }}/.zshrc"
+        owner: "{{ target_user }}"
+        group: "{{ target_user }}"
+        mode: "0644"

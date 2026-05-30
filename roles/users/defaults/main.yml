@@ -1,0 +1,31 @@
+---
+# MOTD
+motd: false
+motd_message: 'Welcome to the My servers!'
+motd_who: 'Ahmad DevOps'
+
+# Default shell for new users
+default_shell: /bin/zsh
+
+# SSH key files path (relative to tasks/)
+ssh_key_path: files
+
+# User and group definitions (override in group_vars / host_vars)
+users: []
+user_groups: []
+
+# Users that must never be removed even if not in the users list
+users_to_keep:
+  - root
+  - ubuntu
+  - centos
+  - kube
+
+# SSH hardening parameters
+ssh_permit_root_login: "no"
+ssh_password_authentication: "no"
+ssh_max_auth_tries: 3
+ssh_login_grace_time: 30
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_allow_extra_users: []   # extra users beyond filtered_users (e.g. deploy, gitlab-runner)

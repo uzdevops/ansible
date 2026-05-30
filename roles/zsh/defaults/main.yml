@@ -1,0 +1,18 @@
+---
+# Zsh binary path fallback (used if 'which zsh' fails)
+default_zsh_path: /usr/bin/zsh
+
+# Oh My Zsh theme
+zsh_theme: "dieter"
+
+# Plugins to enable (must be installed under .oh-my-zsh/custom/plugins/)
+zsh_plugins:
+  - git
+  - zsh-autosuggestions
+  - zsh-syntax-highlighting
+
+# Users to configure — populate in group_vars or host_vars.
+# root is supported: home resolves to /root automatically.
+# Example:
+#   zsh_users: "{{ users | map(attribute='name') | list + ['root'] }}"
+zsh_users: []

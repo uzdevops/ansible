@@ -1,0 +1,32 @@
+# Managed by Ansible — do not edit manually
+# Use 'visudo' if manual edits are required
+
+Defaults    env_reset
+Defaults    mail_badpass
+Defaults    secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+{% if ansible_os_family == "RedHat" %}
+Defaults    requiretty
+Defaults    !visiblepw
+Defaults    always_set_home
+{% endif %}
+
+# Root
+root  ALL=(ALL:ALL) ALL
+
+# Groups
+%wheel      ALL=(ALL) NOPASSWD: ALL
+%sudo       ALL=(ALL:ALL) NOPASSWD: ALL
+%operations ALL=(ALL) NOPASSWD: ALL
+
+# Per-user sudo on specific hosts
+{% for user in users %}
+{% if user.sudo is defined and user.sudo %}
+{% for host in user.sudo %}
+{% if host != 'all' %}
+{{ user.name }}  {{ host }}=(ALL) NOPASSWD: ALL
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+#includedir /etc/sudoers.d

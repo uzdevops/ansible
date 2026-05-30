@@ -1,0 +1,54 @@
+---
+# ── A: sysctl hardening ─────────────────────────────────────────
+# kernel.core_dump_filter is NOT a valid sysctl key.
+# Core dump protection is provided by fs.suid_dumpable = 0 below.
+sysctl_hardening:
+  kernel.randomize_va_space: 2
+  kernel.dmesg_restrict: 1
+  fs.suid_dumpable: 0
+  net.ipv4.tcp_syncookies: 1
+  net.ipv4.ip_forward: 0
+  net.ipv4.conf.all.rp_filter: 1
+  net.ipv4.conf.default.rp_filter: 1
+  net.ipv4.conf.all.accept_redirects: 0
+  net.ipv4.conf.all.send_redirects: 0
+  net.ipv6.conf.all.disable_ipv6: 1
+  net.ipv6.conf.default.disable_ipv6: 1
+
+# ── B: USB storage ──────────────────────────────────────────────
+usb_storage_blacklist: true
+
+# ── C: /tmp and /var/tmp ─────────────────────────────────────────
+tmp_mount_options: "mode=1777,strictatime,noexec,nosuid,nodev"
+var_tmp_mount_options: "mode=1777,strictatime,noexec,nosuid,nodev"
+
+# ── D: Unnecessary services ──────────────────────────────────────
+security_disabled_services:
+  - avahi-daemon
+  - cups
+  - rpcbind
+  - nfs-server
+  - bluetooth
+  - postfix
+  - telnet
+  - rsh
+  - talk
+
+# ── E: Password & sudo policy ────────────────────────────────────
+pwquality_minlen: 12
+pwquality_dcredit: -1
+pwquality_ucredit: -1
+pwquality_lcredit: -1
+pwquality_ocredit: -1
+
+faillock_deny: 5
+faillock_unlock_time: 600
+faillock_fail_interval: 900
+
+sudo_timestamp_timeout: 15
+sudo_log_dir: /var/log/sudo-io
+
+# ── F: auditd ────────────────────────────────────────────────────
+auditd_max_log_file: 50
+auditd_max_log_file_action: rotate
+auditd_num_logs: 5
