@@ -1,0 +1,85 @@
+---
+- name: Deploy nginx logrotate configuration
+  ansible.builtin.copy:
+    content: |
+      /var/log/nginx/*.log {
+          daily
+          rotate 14
+          compress
+          delaycompress
+          missingok
+          notifempty
+          sharedscripts
+          postrotate
+              if [ -f /run/nginx.pid ]; then
+                  nginx -s reopen
+              fi
+          endscript
+      }
+    dest: /etc/logrotate.d/nginx
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [nginx, nginx_system]
+
+- name: Configure nginx open file limits
+  ansible.builtin.blockinfile:
+    path: /etc/security/limits.conf
+    marker: "# {mark} ANSIBLE MANAGED NGINX LIMITS"
+    block: |
+      nginx soft nofile 65535
+      nginx hard nofile 65535
+      root  soft nofile 65535
+      root  hard nofile 65535
+  tags: [nginx, nginx_system]
+
+- name: Deploy nginx sysctl configuration
+  ansible.builtin.copy:
+    content: |
+      fs.file-max = 65535
+      net.core.somaxconn = 65535
+      net.ipv4.tcp_max_syn_backlog = 65535
+    dest: /etc/sysctl.d/99-nginx.conf
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [nginx, nginx_system]
+
+- name: Apply sysctl settings
+  ansible.builtin.command: sysctl --system
+  changed_when: false
+  tags: [nginx, nginx_system]
+
+- name: Create nginx systemd override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/nginx.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [nginx, nginx_system]
+
+- name: Deploy nginx systemd LimitNOFILE override
+  ansible.builtin.copy:
+    content: |
+      [Service]
+      LimitNOFILE=65535
+    dest: /etc/systemd/system/nginx.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd daemon
+    - restart nginx
+  tags: [nginx, nginx_system]
+
+- name: Flush handlers to apply systemd override
+  ansible.builtin.meta: flush_handlers
+  tags: [nginx, nginx_system]
+
+- name: Verify LimitNOFILE is applied
+  ansible.builtin.command: systemctl show nginx --property=LimitNOFILE
+  register: nginx_limit_check
+  changed_when: false
+  failed_when: "'LimitNOFILE=65535' not in nginx_limit_check.stdout"
+  tags: [nginx, nginx_system]

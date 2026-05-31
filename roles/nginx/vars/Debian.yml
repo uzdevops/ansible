@@ -1,0 +1,8 @@
+---
+nginx_pkg_name: nginx
+nginx_service_name: nginx
+nginx_user: www-data
+nginx_group: www-data
+nginx_repo_url: "https://nginx.org/packages/{{ ansible_distribution | lower }}"
+nginx_gpg_key_url: https://nginx.org/keys/nginx_signing.key
+nginx_gpg_key_path: /etc/apt/keyrings/nginx.asc

@@ -1,16 +1,20 @@
 ---
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+  tags: [nginx, nginx_install, nginx_config, nginx_system, nginx_validate]
+
 - name: Install nginx
   ansible.builtin.include_tasks: install.yml
-  tags: [nginx, install]
+  tags: [nginx, nginx_install]
 
 - name: Configure nginx
   ansible.builtin.include_tasks: config.yml
-  tags: [nginx, config]
-
-- name: Configure logrotate
-  ansible.builtin.include_tasks: logrotate.yml
-  tags: [nginx, logrotate]
+  tags: [nginx, nginx_config]
 
 - name: Configure system limits
-  ansible.builtin.include_tasks: system_limits.yml
-  tags: [nginx, limits]
+  ansible.builtin.include_tasks: system.yml
+  tags: [nginx, nginx_system]
+
+- name: Validate nginx configuration
+  ansible.builtin.include_tasks: validate.yml
+  tags: [nginx, nginx_validate]

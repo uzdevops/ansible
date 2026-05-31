@@ -1,0 +1,9 @@
+---
+- name: Install and configure nginx on project-a prod servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Run nginx role
+      ansible.builtin.include_role:
+        name: nginx

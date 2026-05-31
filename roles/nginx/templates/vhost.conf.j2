@@ -1,0 +1,71 @@
+{% if item.type == 'proxy' and item.upstream | length > 1 %}
+upstream {{ item.name | replace('.', '_') }}_backend {
+{% for srv in item.upstream %}
+    server {{ srv.server }};
+{% endfor %}
+}
+
+{% endif %}
+{% if item.type == 'static' %}
+server {
+    listen {{ item.port }};
+    server_name {{ item.name }};
+    root {{ item.root }};
+    index index.html index.htm;
+
+    access_log /var/log/nginx/{{ item.name }}_access.log logstash_format;
+    error_log  /var/log/nginx/{{ item.name }}_error.log warn;
+}
+{% elif item.type == 'proxy' %}
+{% if item.ssl | default(false) %}
+server {
+    listen 80;
+    server_name {{ item.name }};
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name {{ item.name }};
+
+    ssl_certificate     {{ item.ssl_cert }};
+    ssl_certificate_key {{ item.ssl_key }};
+    include /etc/nginx/includes/ssl_params.conf;
+
+    access_log /var/log/nginx/{{ item.name }}_access.log logstash_format;
+    error_log  /var/log/nginx/{{ item.name }}_error.log warn;
+
+    location / {
+        include /etc/nginx/includes/proxy_params.conf;
+{% if item.upstream | length > 1 %}
+        proxy_pass http://{{ item.name | replace('.', '_') }}_backend;
+{% else %}
+        proxy_pass http://{{ item.upstream[0].server }};
+{% endif %}
+{% if item.proxy_read_timeout is defined %}
+        proxy_read_timeout {{ item.proxy_read_timeout }};
+{% endif %}
+    }
+}
+{% else %}
+server {
+    listen {{ item.port }};
+    server_name {{ item.name }};
+
+    access_log /var/log/nginx/{{ item.name }}_access.log logstash_format;
+    error_log  /var/log/nginx/{{ item.name }}_error.log warn;
+
+    location / {
+        include /etc/nginx/includes/proxy_params.conf;
+{% if item.upstream | length > 1 %}
+        proxy_pass http://{{ item.name | replace('.', '_') }}_backend;
+{% else %}
+        proxy_pass http://{{ item.upstream[0].server }};
+{% endif %}
+{% if item.proxy_read_timeout is defined %}
+        proxy_read_timeout {{ item.proxy_read_timeout }};
+{% endif %}
+    }
+}
+{% endif %}
+{% endif %}

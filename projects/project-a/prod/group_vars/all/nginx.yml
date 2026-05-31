@@ -1,21 +1,13 @@
 ---
-nginx_sites:
-  - name: project-a
-    server_name: project-a.example.com
-    listen_port: 443
-    listen_ssl: true
-    ssl_certificate: /etc/ssl/certs/project-a.crt
-    ssl_certificate_key: /etc/ssl/private/project-a.key
-    root: /var/www/project-a
-    index: index.html
-    access_log: /var/log/nginx/project-a_access.log
-    error_log: /var/log/nginx/project-a_error.log
-    log_format: json
-    use_allowlist: false
-    locations:
-      - path: /
-        proxy_pass: http://127.0.0.1:8080
-        extra: |
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-    extra_config: ""
+nginx_gzip_enabled: false
+
+nginx_ip_allowlist: []
+nginx_ip_blocklist: []
+
+nginx_vhosts:
+  - name: project-a.example.com
+    type: proxy
+    port: 80
+    ssl: false
+    upstream:
+      - server: 127.0.0.1:8080

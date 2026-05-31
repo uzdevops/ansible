@@ -1,43 +1,38 @@
 ---
-nginx_limit_nofile: 65535
-nginx_worker_processes: auto
-nginx_worker_connections: 1024
-nginx_keepalive_timeout: 65
-nginx_server_tokens: "off"
-nginx_gzip: "on"
+# Worker
+nginx_worker_connections: 16384
 
-# System tuning
-nginx_fs_file_max: 2097152
-nginx_somaxconn: 65535
-nginx_tcp_max_syn_backlog: 65535
+# Gzip
+nginx_gzip_enabled: false
 
-nginx_log_formats:
-  - name: main
-    format: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"'
-  - name: json
-    format: |
-      "{\"time\":\"$time_iso8601\",\"remote_addr\":\"$remote_addr\",\"method\":\"$request_method\",
-      \"uri\":\"$request_uri\",\"status\":\"$status\",\"bytes\":\"$body_bytes_sent\",
-      \"referer\":\"$http_referer\",\"ua\":\"$http_user_agent\",\"rt\":\"$request_time\"}"
+# IP access control
+nginx_ip_allowlist: []
+nginx_ip_blocklist: []
 
-nginx_allowlist_ips: []
+# Virtual hosts
+nginx_vhosts: []
 
-nginx_sites: []
-# Each site object shape:
-# - name: myapp
-#   server_name: example.com
-#   listen_port: 80
-#   listen_ssl: false
-#   ssl_certificate: ""
-#   ssl_certificate_key: ""
-#   root: /var/www/myapp
-#   index: index.html
-#   access_log: /var/log/nginx/myapp_access.log
-#   error_log: /var/log/nginx/myapp_error.log
-#   log_format: json
-#   use_allowlist: false
-#   locations:
-#     - path: /
-#       proxy_pass: ""
-#       extra: ""
-#   extra_config: ""
+# Example vhost structure:
+# nginx_vhosts:
+#   - name: api.example.com
+#     type: proxy
+#     port: 80
+#     ssl: false
+#     upstream:
+#       - server: 127.0.0.1:8000
+#       - server: 127.0.0.1:8001
+#     proxy_read_timeout: 120s   # optional
+#
+#   - name: app.example.com
+#     type: proxy
+#     port: 443
+#     ssl: true
+#     ssl_cert: /etc/ssl/certs/app.crt
+#     ssl_key: /etc/ssl/private/app.key
+#     upstream:
+#       - server: 127.0.0.1:3000
+#
+#   - name: static.example.com
+#     type: static
+#     port: 80
+#     root: /var/www/static

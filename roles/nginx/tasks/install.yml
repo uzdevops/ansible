@@ -1,21 +1,77 @@
 ---
-- name: Install nginx (Debian)
-  ansible.builtin.apt:
-    name: nginx
-    state: present
-    update_cache: true
-    cache_valid_time: 3600
-  when: ansible_os_family == "Debian"
+- name: Check if nginx is already installed
+  ansible.builtin.command: which nginx
+  register: nginx_installed
+  changed_when: false
+  failed_when: false
+  tags: [nginx, nginx_install]
+
+- name: Install nginx (Debian/Ubuntu)
+  when:
+    - ansible_os_family == "Debian"
+    - nginx_installed.rc != 0
+  tags: [nginx, nginx_install]
+  block:
+    - name: Ensure /etc/apt/keyrings directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - curl
+          - gnupg2
+          - ca-certificates
+          - apt-transport-https
+        state: present
+        update_cache: true
+
+    - name: Add nginx GPG key
+      ansible.builtin.get_url:
+        url: "{{ nginx_gpg_key_url }}"
+        dest: "{{ nginx_gpg_key_path }}"
+        mode: "0644"
+        force: false
+
+    - name: Add nginx apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by={{ nginx_gpg_key_path }}] {{ nginx_repo_url }} {{ ansible_distribution_release }} nginx"
+        state: present
+        filename: nginx
+        update_cache: true
+
+    - name: Install nginx package
+      ansible.builtin.apt:
+        name: "{{ nginx_pkg_name }}"
+        state: present
 
 - name: Install nginx (RedHat)
-  ansible.builtin.dnf:
-    name: nginx
-    state: present
-  when: ansible_os_family == "RedHat"
+  when:
+    - ansible_os_family == "RedHat"
+    - nginx_installed.rc != 0
+  tags: [nginx, nginx_install]
+  block:
+    - name: Add nginx yum repository
+      ansible.builtin.yum_repository:
+        name: nginx-stable
+        description: nginx stable repo
+        baseurl: "{{ nginx_repo_url }}"
+        gpgcheck: true
+        gpgkey: "{{ nginx_gpg_key_url }}"
+        enabled: true
+        state: present
+
+    - name: Install nginx package
+      ansible.builtin.dnf:
+        name: "{{ nginx_pkg_name }}"
+        state: present
 
 - name: Enable and start nginx service
   ansible.builtin.systemd:
-    name: nginx
+    name: "{{ nginx_service_name }}"
     state: started
     enabled: true
-  ignore_errors: "{{ ansible_check_mode }}"
+    daemon_reload: true
+  tags: [nginx, nginx_install]

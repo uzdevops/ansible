@@ -1,0 +1,7 @@
+---
+- name: Test nginx configuration
+  ansible.builtin.command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0
+  tags: [nginx, nginx_validate]
