@@ -1,2 +1,7 @@
 ---
-# handlers file for node-exporter
+- name: restart node-exporter stack
+  ansible.builtin.systemd:
+    name: "{{ node_exporter_systemd_service }}"
+    state: restarted
+    daemon_reload: true
+  listen: restart node-exporter stack

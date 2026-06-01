@@ -2,14 +2,9 @@
 services:
   {{ node_exporter_service_name }}:
     image: {{ node_exporter_image }}
-    hostname: "{% raw %}{{.Node.Hostname}}{% endraw %}"
-    ports:
-      - target: {{ node_exporter_port }}
-        published: {{ node_exporter_port }}
-        protocol: tcp
-        mode: host
     network_mode: host
     pid: host
+    restart: always
     volumes:
 {% for v in node_exporter_volumes %}
       - {{ v }}
@@ -19,17 +14,8 @@ services:
       - {{ c }}
 {% endfor %}
     deploy:
-      mode: global
       resources:
         limits:
           memory: {{ node_exporter_memory_limit }}
         reservations:
           memory: {{ node_exporter_memory_reservation }}
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-      update_config:
-        parallelism: 1
-        delay: 10s
-        order: start-first

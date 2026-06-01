@@ -3,13 +3,11 @@
   hosts: all
   become: true
   tasks:
-    - name: Install Docker and Python bindings
+    - name: Install Docker
       ansible.builtin.apt:
         name:
           - docker.io
-          - python3-docker
-          - python3-jsondiff
-          - python3-yaml
+          - docker-compose-v2
         state: present
         update_cache: true
 
