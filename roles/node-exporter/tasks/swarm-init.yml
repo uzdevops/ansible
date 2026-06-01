@@ -1,0 +1,11 @@
+---
+- name: Check Docker Swarm status
+  ansible.builtin.command: docker info
+  register: docker_info_out
+  changed_when: false
+
+- name: Initialize Docker Swarm
+  ansible.builtin.command: >
+    docker swarm init --advertise-addr {{ node_exporter_swarm_advertise_addr }}
+  when: "'Swarm: inactive' in docker_info_out.stdout"
+  changed_when: true

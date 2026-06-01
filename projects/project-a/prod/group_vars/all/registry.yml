@@ -1,0 +1,5 @@
+---
+registry_url: "harbor.ahmad.uz"
+registry_username: "ahmad"
+registry_password: "{{ vault_harbor_password }}"
+registry_logout: false

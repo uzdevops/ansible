@@ -1,0 +1,29 @@
+---
+node_exporter_image: prom/node-exporter:latest
+node_exporter_service_name: node-exporter
+node_exporter_stack_name: monitoring
+node_exporter_port: 9100
+node_exporter_deploy_dir: /var/docker-dir/monitoring
+node_exporter_swarm_advertise_addr: "{{ ansible_default_ipv4.address }}"
+
+node_exporter_memory_limit: 128M
+node_exporter_memory_reservation: 64M
+
+node_exporter_volumes:
+  - /proc:/host/proc:ro
+  - /sys:/host/sys:ro
+  - /:/rootfs:ro
+
+node_exporter_command:
+  - --path.procfs=/host/proc
+  - --path.sysfs=/host/sys
+  - --path.rootfs=/rootfs
+  - --collector.cpu
+  - --collector.meminfo
+  - --collector.loadavg
+  - --collector.filesystem
+  - --collector.time
+  - --collector.uname
+  - --collector.netstat
+  - --collector.stat
+  - --web.listen-address=:{{ node_exporter_port }}

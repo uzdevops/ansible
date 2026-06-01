@@ -1,0 +1,10 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert Docker is running
+  ansible.builtin.assert:
+    that:
+      - "'docker.service' in ansible_facts.services"
+      - "ansible_facts.services['docker.service'].state == 'running'"
+    fail_msg: "Docker is not running. Run the docker-install role first."

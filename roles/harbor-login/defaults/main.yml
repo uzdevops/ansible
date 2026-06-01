@@ -1,5 +1,0 @@
----
-harbor_url: "harbor.imv.uz"
-harbor_username: "deployer"
-harbor_password: "{{ vault_harbor_password }}"
-harbor_logout: false

@@ -1,0 +1,9 @@
+---
+- name: Login to container registry on project-a prod servers
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Run registry-login role
+      ansible.builtin.include_role:
+        name: registry-login

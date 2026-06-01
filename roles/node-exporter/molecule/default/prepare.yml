@@ -1,0 +1,20 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker and Python bindings
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - python3-docker
+          - python3-jsondiff
+          - python3-yaml
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true

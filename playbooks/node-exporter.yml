@@ -1,0 +1,6 @@
+---
+- name: Deploy node-exporter monitoring stack
+  hosts: all
+  become: true
+  roles:
+    - role: node-exporter

@@ -1,0 +1,6 @@
+---
+node_exporter_stack_name: project-a-monitoring
+node_exporter_swarm_advertise_addr: "{{ ansible_default_ipv4.address }}"
+
+node_exporter_memory_limit: 128M
+node_exporter_memory_reservation: 64M

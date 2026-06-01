@@ -1,0 +1,14 @@
+---
+- name: Login to container registry
+  community.docker.docker_login:
+    registry_url: "{{ registry_url }}"
+    username: "{{ registry_username }}"
+    password: "{{ registry_password }}"
+    state: present
+  no_log: true
+
+- name: Logout from container registry
+  community.docker.docker_login:
+    registry_url: "{{ registry_url }}"
+    state: absent
+  when: registry_logout | bool
