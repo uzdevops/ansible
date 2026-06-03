@@ -1,0 +1,50 @@
+---
+# Required — override per service
+hippo_service_name: myservice
+hippo_image: har.hippo.uz/myservice/myservice:latest
+hippo_deploy_dir: /opt/hippo/{{ hippo_service_name }}
+
+hippo_ports: []
+# hippo_ports:
+#   - "9001:9001"
+
+hippo_environments: {}
+# hippo_environments:
+#   TZ: "Asia/Tashkent"
+
+hippo_secrets: []
+# hippo_secrets:
+#   - VAULT_ADDR
+#   - VAULT_PASSWORD
+
+hippo_network: erp_net
+
+# Deploy config
+hippo_replicas: 1
+hippo_restart_condition: any
+hippo_restart_delay: 5s
+
+hippo_update_parallelism: 1
+hippo_update_order: stop-first
+hippo_update_failure_action: pause
+hippo_update_monitor: 5s
+
+hippo_rollback_parallelism: 1
+hippo_rollback_order: stop-first
+hippo_rollback_failure_action: pause
+hippo_rollback_monitor: 5s
+
+hippo_resources: {}
+# hippo_resources:
+#   limits:
+#     memory: 512M
+#     cpus: "1.0"
+#   reservations:
+#     memory: 256M
+#     cpus: "0.5"
+
+# Harbor registry
+hippo_harbor_enabled: true
+hippo_harbor_url: har.hippo.uz
+hippo_harbor_username: "{{ vault_harbor_username }}"
+hippo_harbor_password: "{{ vault_harbor_password }}"

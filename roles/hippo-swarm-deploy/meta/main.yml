@@ -1,0 +1,19 @@
+galaxy_info:
+  author: Abbos Pulatov
+  description: Deploy a service to Docker Swarm with Harbor registry and Vault secrets
+  license: MIT
+  min_ansible_version: "2.18"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: EL
+      versions:
+        - all
+  galaxy_tags:
+    - docker
+    - swarm
+    - harbor

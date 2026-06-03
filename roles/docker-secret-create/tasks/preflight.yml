@@ -1,0 +1,25 @@
+---
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Assert Docker is installed and running
+  ansible.builtin.assert:
+    that:
+      - "'docker.service' in ansible_facts.services"
+      - "ansible_facts.services['docker.service'].state == 'running'"
+    fail_msg: "Docker is not running. Run the docker-install role first."
+
+- name: Check Docker Swarm status
+  ansible.builtin.command: docker info
+  register: docker_info_out
+  changed_when: false
+
+- name: Assert node is a Swarm manager
+  ansible.builtin.assert:
+    that: "'Is Manager: true' in docker_info_out.stdout"
+    fail_msg: "This node is not a Swarm manager. Docker secrets require Swarm mode."
+
+- name: Assert docker_secrets list is defined and not empty
+  ansible.builtin.assert:
+    that: docker_secrets | length > 0
+    fail_msg: "docker_secrets list is empty. Define secrets in group_vars or pass via -e."

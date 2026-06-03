@@ -1,0 +1,21 @@
+---
+docker_secrets: []
+# Each item: name (secret name in Swarm) and data (secret value).
+# Always reference vault variables for data — never put plaintext here.
+#
+# Example:
+#   docker_secrets:
+#     - name: db_password
+#       data: "{{ vault_db_password }}"
+#     - name: api_key
+#       data: "{{ vault_api_key }}"
+#
+# Vault pattern:
+#   group_vars/all/vault.yml  (ansible-vault encrypted file)
+#     vault_db_password: "actual_secret"
+#     vault_api_key: "actual_key"
+#
+#   group_vars/all/vars.yml   (plain file, safe to commit)
+#     docker_secrets:
+#       - name: db_password
+#         data: "{{ vault_db_password }}"

@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    hippo_service_name: account_service
+    hippo_image: nginx:alpine
+    hippo_harbor_enabled: false
+    hippo_ports:
+      - "9001:80"
+    hippo_secrets:
+      - VAULT_ADDR
+      - VAULT_PASSWORD
+      - VAULT_USERNAME
+      - VAULT_ACCOUNT_SERVICE_PATH
+
+  roles:
+    - role: hippo-swarm-deploy

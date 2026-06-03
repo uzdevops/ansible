@@ -1,0 +1,6 @@
+---
+- name: Deploy service to Docker Swarm
+  hosts: all
+  become: true
+  roles:
+    - role: hippo-swarm-deploy

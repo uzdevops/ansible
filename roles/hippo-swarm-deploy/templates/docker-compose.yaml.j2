@@ -1,0 +1,73 @@
+# Ansible managed
+services:
+  {{ hippo_service_name }}:
+    image: {{ hippo_image }}
+
+    networks:
+      - {{ hippo_network }}
+{% if hippo_ports | length > 0 %}
+
+    ports:
+{% for p in hippo_ports %}
+      - "{{ p }}"
+{% endfor %}
+{% endif %}
+{% if hippo_environments | length > 0 %}
+
+    environment:
+{% for key, value in hippo_environments.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if hippo_secrets | length > 0 %}
+
+    secrets:
+{% for s in hippo_secrets %}
+      - {{ s }}
+{% endfor %}
+{% endif %}
+
+    deploy:
+      replicas: {{ hippo_replicas }}
+      restart_policy:
+        condition: {{ hippo_restart_condition }}
+        delay: {{ hippo_restart_delay }}
+      update_config:
+        parallelism: {{ hippo_update_parallelism }}
+        order: {{ hippo_update_order }}
+        failure_action: {{ hippo_update_failure_action }}
+        monitor: {{ hippo_update_monitor }}
+      rollback_config:
+        parallelism: {{ hippo_rollback_parallelism }}
+        order: {{ hippo_rollback_order }}
+        failure_action: {{ hippo_rollback_failure_action }}
+        monitor: {{ hippo_rollback_monitor }}
+{% if hippo_resources %}
+      resources:
+        limits:
+{% if hippo_resources.limits.memory is defined %}
+          memory: {{ hippo_resources.limits.memory }}
+{% endif %}
+{% if hippo_resources.limits.cpus is defined %}
+          cpus: '{{ hippo_resources.limits.cpus }}'
+{% endif %}
+        reservations:
+{% if hippo_resources.reservations.memory is defined %}
+          memory: {{ hippo_resources.reservations.memory }}
+{% endif %}
+{% if hippo_resources.reservations.cpus is defined %}
+          cpus: '{{ hippo_resources.reservations.cpus }}'
+{% endif %}
+{% endif %}
+
+networks:
+  {{ hippo_network }}:
+    external: true
+{% if hippo_secrets | length > 0 %}
+
+secrets:
+{% for s in hippo_secrets %}
+  {{ s }}:
+    external: true
+{% endfor %}
+{% endif %}

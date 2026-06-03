@@ -1,0 +1,46 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Docker and Python bindings
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - python3-docker
+          - python3-jsondiff
+          - python3-yaml
+        state: present
+        update_cache: true
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Initialize Docker Swarm
+      ansible.builtin.command: docker swarm init --advertise-addr 127.0.0.1
+      changed_when: true
+      register: swarm_init
+      failed_when:
+        - swarm_init.rc != 0
+        - "'already part of a swarm' not in swarm_init.stderr"
+
+    - name: Create external overlay network
+      ansible.builtin.command: docker network create --driver overlay erp_net
+      changed_when: true
+      register: net_create
+      failed_when:
+        - net_create.rc != 0
+        - "'already exists' not in net_create.stderr"
+
+    - name: Create test Swarm secrets
+      ansible.builtin.shell: "echo 'test' | docker secret create {{ item }} -"
+      loop:
+        - VAULT_ADDR
+        - VAULT_PASSWORD
+        - VAULT_USERNAME
+        - VAULT_ACCOUNT_SERVICE_PATH
+      changed_when: true
+      failed_when: false

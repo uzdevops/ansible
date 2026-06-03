@@ -1,0 +1,27 @@
+---
+- name: Install Python Docker dependencies
+  ansible.builtin.include_tasks: dependency.yml
+
+- name: Run preflight checks
+  ansible.builtin.include_tasks: preflight.yml
+
+- name: Create Docker secrets
+  community.docker.docker_secret:
+    name: "{{ item.name }}"
+    data: "{{ item.data }}"
+    state: present
+    force: "{{ item.force | default(false) }}"
+  loop: "{{ docker_secrets }}"
+  no_log: true
+  tags: [secrets]
+
+- name: List installed Docker secrets
+  ansible.builtin.command: docker secret ls
+  register: docker_secret_ls
+  changed_when: false
+  tags: [secrets, list]
+
+- name: Print Docker secrets
+  ansible.builtin.debug:
+    msg: "{{ docker_secret_ls.stdout_lines }}"
+  tags: [secrets, list]

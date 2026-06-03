@@ -1,0 +1,53 @@
+---
+- name: Install Python Docker dependencies
+  ansible.builtin.include_tasks: dependency.yml
+
+- name: Run preflight checks
+  ansible.builtin.include_tasks: preflight.yml
+
+- name: Docker login to Harbor
+  community.docker.docker_login:
+    registry_url: "{{ hippo_harbor_url }}"
+    username: "{{ hippo_harbor_username }}"
+    password: "{{ hippo_harbor_password }}"
+    state: present
+  no_log: true
+  when: hippo_harbor_enabled | bool
+  tags: [login]
+
+- name: Ensure deploy directory exists
+  ansible.builtin.file:
+    path: "{{ hippo_deploy_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [dirs]
+
+- name: Deploy docker-compose file
+  ansible.builtin.template:
+    src: docker-compose.yaml.j2
+    dest: "{{ hippo_deploy_dir }}/docker-compose.yaml"
+    mode: "0644"
+  tags: [compose]
+
+- name: Pull service image
+  community.docker.docker_image:
+    name: "{{ hippo_image }}"
+    source: pull
+  tags: [pull]
+
+- name: Deploy stack to Docker Swarm
+  community.docker.docker_stack:
+    name: "{{ hippo_service_name }}"
+    compose:
+      - "{{ hippo_deploy_dir }}/docker-compose.yaml"
+    state: present
+  tags: [stack]
+
+- name: Docker logout from Harbor
+  community.docker.docker_login:
+    registry_url: "{{ hippo_harbor_url }}"
+    state: absent
+  when: hippo_harbor_enabled | bool
+  tags: [login]
